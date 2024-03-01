@@ -39,6 +39,7 @@ type Route struct {
 }
 
 var controllerTemplate = `
+require 'grpc_rest'
 require 'services/geo_admin/v1/test_services_pb'
 class {{.ControllerName}}Controller < ActionController::Base
   protect_from_forgery with: :null_session
