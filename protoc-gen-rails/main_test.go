@@ -12,31 +12,42 @@ import (
 
 // Overall approach taken from https://github.com/mix-php/mix/blob/master/src/grpc/protoc-gen-mix/plugin_test.go
 
-// When the environment variable RUN_AS_PROTOC_GEN_AVRO is set, we skip running
-// tests and instead act as protoc-gen-avro. This allows the test binary to
+// When the environment variable RUN_AS_PROTOC_GEN_RAILS is set, we skip running
+// tests and instead act as protoc-gen-rails. This allows the test binary to
 // pass itself to protoc.
 func init() {
-    if os.Getenv("RUN_AS_PROTOC_GEN_AVRO") != "" {
+    if os.Getenv("RUN_AS_PROTOC_GEN_RAILS") != "" {
         main()
         os.Exit(0)
     }
 }
 
-func fileNames(directory string, appendDirectory bool) ([]string, error) {
-    files, err := os.ReadDir(directory)
+func fileNames(directory string, appendDirectory bool, extension string) ([]string, error) {
+    var files []os.FileInfo
+    var fullPaths []string
+    err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+        if extension != "" && filepath.Ext(path) != extension {
+            return nil
+        }
+        if info.IsDir() {
+            return nil
+        }
+        files = append(files, info)
+        fullPaths = append(fullPaths, path)
+        if err != nil {
+            fmt.Println("ERROR:", err)
+        }
+        return nil
+    })
     if err != nil {
         return nil, fmt.Errorf("can't read %s directory: %w", directory, err)
     }
+    if appendDirectory {
+        return fullPaths, nil
+    }
     var names []string
-    for _, file := range files {
-        if file.IsDir() {
-            continue
-        }
-        if appendDirectory {
-          names = append(names, filepath.Base(directory) + "/" + file.Name())
-        } else {
-            names = append(names, file.Name())
-        }
+    for _, file := range fullPaths {
+      names = append(names, strings.Replace(file, directory, "", 1)[1:])
     }
     return names, nil
 }
@@ -51,17 +62,17 @@ func runTest(t *testing.T, directory string, options map[string]string) {
 
     args := []string{
         "-I.",
-        "--avro_out=" + tmpdir,
+        "--rails_out=" + tmpdir,
     }
-    names, err := fileNames(workdir + "/testdata", true)
+    names, err := fileNames(workdir + "/testdata", false, ".proto")
     if err != nil {
         t.Fatal(fmt.Errorf("testData fileNames %w", err))
     }
     for _, name := range names {
-        args = append(args, name)
+        args = append(args, fmt.Sprintf("testdata/%v", name))
     }
     for k, v := range options {
-        args = append(args, "--avro_opt=" + k + "=" + v)
+        args = append(args, "--rails_opt=" + k + "=" + v)
     }
     protoc(t, args)
 
@@ -78,39 +89,26 @@ func Test_Base(t *testing.T) {
     runTest(t, "base", map[string]string{})
 }
 
-func Test_CollapseFields(t *testing.T) {
-    runTest(t, "collapse_fields", map[string]string{"collapse_fields": "StringList"})
-}
-
-func Test_EmitOnly(t *testing.T) {
-    runTest(t, "emit_only", map[string]string{"emit_only": "Widget"})
-}
-
-func Test_NamespaceMap(t *testing.T) {
-    runTest(t, "namespace_map", map[string]string{"namespace_map": "testdata:mynamespace"})
-}
-
-func Test_PreserveNonStringMaps(t *testing.T) {
-    runTest(t, "preserve_non_string_maps", map[string]string{"preserve_non_string_maps": "true"})
-}
-
 func assertEqualFiles(t *testing.T, original, generated string) {
-    names, err := fileNames(original, false)
+    names, err := fileNames(original, false, "")
     if err != nil {
         t.Fatal(fmt.Errorf("original fileNames %w", err))
     }
-    generatedNames, err := fileNames(generated, false)
+    generatedNames, err := fileNames(generated, false, "")
     if err != nil {
         t.Fatal(fmt.Errorf("generated fileNames %w", err))
     }
     assert.Equal(t, names, generatedNames)
+    // put back subdirectories
+    names, _ = fileNames(original, true, "")
+    generatedNames, _ = fileNames(generated, true, "")
     for i, name := range names {
-        originalData, err := os.ReadFile(original + "/" + name)
+        originalData, err := os.ReadFile(name)
         if err != nil {
             t.Fatal("Can't find original file for comparison")
         }
 
-        generatedData, err := os.ReadFile(generated + "/" + generatedNames[i])
+        generatedData, err := os.ReadFile(generatedNames[i])
         if err != nil {
             t.Fatal("Can't find generated file for comparison")
         }
@@ -120,9 +118,9 @@ func assertEqualFiles(t *testing.T, original, generated string) {
 }
 
 func protoc(t *testing.T, args []string) {
-    cmd := exec.Command("protoc", "--plugin=protoc-gen-avro=" + os.Args[0])
+    cmd := exec.Command("protoc", "--proto_path=.", "--proto_path=./google-deps", "--plugin=protoc-gen-rails=" + os.Args[0])
     cmd.Args = append(cmd.Args, args...)
-    cmd.Env = append(os.Environ(), "RUN_AS_PROTOC_GEN_AVRO=1")
+    cmd.Env = append(os.Environ(), "RUN_AS_PROTOC_GEN_RAILS=1")
     out, err := cmd.CombinedOutput()
 
     if len(out) > 0 || err != nil {

@@ -5,7 +5,7 @@ go 1.22.0
 require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/stretchr/testify v1.8.4
-	google.golang.org/genproto/googleapis/api v0.0.0-20240125205218-1f4bbc51befe
+	google.golang.org/genproto/googleapis/api v0.0.0-20240228224816-df926f6c8641
 	google.golang.org/protobuf v1.32.0
 )
 

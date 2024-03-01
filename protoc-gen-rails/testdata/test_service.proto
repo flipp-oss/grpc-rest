@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package testdata;
+
+import "google/api/annotations.proto";
+
+message TestRequest {
+  string test_id = 1;
+  string foobar = 2;
+  repeated string repeated_string = 3;
+  SubRecord sub_record = 4;
+  SubRecord second_record = 5;
+}
+
+message SubRecord {
+  string sub_id = 1;
+  string another_id = 2;
+}
+
+message TestResponse {
+  int32 some_int = 1;
+  string full_response = 2;
+}
+
+service MyService {
+  rpc Test(TestRequest) returns (TestResponse) {
+    option (google.api.http) = {
+      get: "/test/{blah=foobar/*}/{repeated_string}"
+      body: "*"
+    };
+  }
+
+  rpc Test2(TestRequest) returns (TestResponse) {
+    option (google.api.http) = {
+      post: "/test2"
+      body: "second_record"
+    };
+  }
+
+  rpc Test3(TestRequest) returns (TestResponse) {
+    option (google.api.http) = {
+      post: "/test3/{sub_record.sub_id}"
+    };
+  }
+
+}
