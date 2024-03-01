@@ -23,7 +23,7 @@ The protobuf generator uses the same annotations as [grpc-gateway](https://githu
 
 ## Installation
 
-First, download `protoc-gen-rails` from the releases page on the right. Ensure it's somewhere in your PATH.
+First, download `protoc-gen-rails` from the releases page on the right and unzip it. Ensure the binary is somewhere in your PATH.
 
 Then, add the following to your `Gemfile`:
 
