@@ -78,7 +78,7 @@ func runTest(t *testing.T, directory string, options map[string]string) {
 
     testDir := workdir + "/testdata/" + directory
     if os.Getenv("UPDATE_SNAPSHOTS") != "" {
-        cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cp %v/* %v", tmpdir, testDir))
+        cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("cp -R %v/* %v", tmpdir, testDir))
         cmd.Run()
     } else {
         assertEqualFiles(t, testDir, tmpdir)

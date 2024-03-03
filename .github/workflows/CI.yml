@@ -8,7 +8,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    runs-on: [ubuntu-latest]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.21'
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v2
+    - run: git reset --hard
+    - run: git clean -f -d
+    - run: cd protoc-gen-rails && go test ./...
+
   build_and_deploy:
+    needs: test
     runs-on: [ubuntu-latest]
     steps:
     - name: Checkout code

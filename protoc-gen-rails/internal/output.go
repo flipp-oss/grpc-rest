@@ -45,7 +45,7 @@ require 'services/geo_admin/v1/test_services_pb'
 class {{.ControllerName}}Controller < ActionController::Base
   protect_from_forgery with: :null_session
 
-	rescue_from Google::Protobuf::TypeError do |e|
+	rescue_from StandardError do |e|
 		render json: GrpcRest.error_msg(e)
 	end
   METHOD_PARAM_MAP = {

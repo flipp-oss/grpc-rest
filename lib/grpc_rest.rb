@@ -1,6 +1,14 @@
 module GrpcRest
   class << self
 
+    def register_server(server)
+      @server = server
+    end
+
+    def underscore(s)
+      GRPC::GenericService.underscore(s)
+    end
+
     # Gets a sub record from a proto. If it doesn't exist, initialize it and set it to the proto,
     # then return it.
     def sub_field(proto, name)
@@ -67,25 +75,37 @@ module GrpcRest
       }
     end
 
+    def send_gruf_request(klass, service_obj, method, request)
+      ref = service_obj.rpc_descs[method.classify.to_sym]
+      handler = klass.new(
+        method_key: method.to_sym,
+        service: service_obj,
+        rpc_desc: ref,
+        active_call: nil,
+        message: request
+      )
+      handler.send(method.to_sym)
+    end
+
+    def send_grpc_request(service, method, request)
+      server_parts = service.split('::')
+      service_name = (server_parts[..-2].map { |p| underscore(p)} + [server_parts[-1]]).join('.')
+      route = "/#{service_name}/#{method.classify}"
+      handler = @server.send(:rpc_handlers)[route.to_sym]
+      handler.call(request)
+    end
+
     def send_request(service, method, request)
-      service_obj = service.constantize::Service
-      response = if defined?(Gruf)
+      if defined?(Gruf)
+        service_obj = service.constantize::Service
         klass = ::Gruf::Controllers::Base.subclasses.find do |k|
           k.bound_service == service_obj
         end
-        ref = service_obj.rpc_descs[method.classify.to_sym]
-        handler = klass.new(
-          method_key: method.to_sym,
-          service: service_obj,
-          rpc_desc: ref,
-          active_call: nil,
-          message: request
-        )
-        handler.send(method.to_sym)
-                 else
-                   raise 'Non-gruf grpc not implemented yet!'
+        if klass
+          return send_gruf_request(klass, service_obj, method, request).to_h
+        end
       end
-      response.to_h
+      send_grpc_request(service, method, request).to_h
     end
   end
 

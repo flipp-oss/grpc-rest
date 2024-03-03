@@ -97,8 +97,15 @@ and the generated controller will look like this:
 require 'services/example/example_services_pb'
 class ExampleServiceController < ActionController::Base
   protect_from_forgery with: :null_session
+  
+  METHOD_PARAM_MAP = {
 
-	rescue_from Google::Protobuf::TypeError do |e|
+    "example" => [
+       {name: "name", val: nil, split_name:["name"]},
+			 ],
+  }.freeze
+
+	rescue_from StandardError do |e|
 		render json: GrpcRest.error_msg(e)
 	end
 
@@ -118,6 +125,36 @@ Rails.application.routes.draw do
   draw(:grpc) # Add this line
 end
 ```
+
+### Hooking up Callbacks
+
+If you're using [gruf](https://github.com/bigcommerce/gruf), as long as your Gruf controllers are loaded on application load, you don't have to do anything else - grpc-rest will automatically hook the callbacks up. If you're not, you have to tell GrpcRest about your server. An example might look like this:
+
+```ruby
+# grpc_setup.rb, a shared library file somewhere in the app
+
+def grpc_server
+  s = GRPC::RpcServer.new
+  s.handle(MyImpl.new) # handler inheriting from your service class - see https://grpc.io/docs/languages/ruby/basics/
+  s
+end
+
+# startup script for gRPC
+
+require "grpc_setup"
+server = grpc_server
+server.run_till_terminated_or_interrupted([1, 'int', 'SIGQUIT'])
+
+# Rails initializer
+require "grpc_setup"
+server = grpc_server
+GrpcRest.register_server(server)
+```
+
+## To Do
+
+* Support repeated fields via comma-separation (matches grpc-gateway, but is it really useful?)
+* Install via homebrew and/or have the binary in the gem itself
 
 ## Contributing
 
