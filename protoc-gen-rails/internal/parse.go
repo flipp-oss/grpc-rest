@@ -1,10 +1,13 @@
 package internal
 
 import (
-  "fmt"
+	"encoding/json"
+	"fmt"
   options "google.golang.org/genproto/googleapis/api/annotations"
   "google.golang.org/protobuf/proto"
   "google.golang.org/protobuf/types/descriptorpb"
+	"regexp"
+	"strings"
 )
 
 func MethodAndPath(pattern any) (string, string, error) {
@@ -25,6 +28,40 @@ func MethodAndPath(pattern any) (string, string, error) {
 	default:
 		return "", "", fmt.Errorf("unknown pattern type %T", pattern)
 	}
+}
+
+type PathInfo struct {
+	Name string
+	ValPattern string
+	SplitName string
+	HasValPattern bool
+}
+
+func ParsedPath(path string) ([]PathInfo, error) {
+	var infos []PathInfo
+	re := regexp.MustCompile("\\{(.*?)}")
+	matches := re.FindAllString(path, -1)
+	for _, match := range matches {
+		name := match[1:len(match)-1]
+		val := ""
+		equal := strings.Index(match, "=")
+		if equal != -1 {
+			val = name[equal:]
+			name = name[0:equal-1]
+		}
+		splitName := strings.Split(name, ".")
+		jsonSplit, err := json.Marshal(splitName)
+		if err != nil {
+			return nil, fmt.Errorf("error marshalling splitName: %w", err)
+		}
+		infos = append(infos, PathInfo{
+			Name: name,
+			ValPattern: val,
+			SplitName: string(jsonSplit),
+			HasValPattern: val != "",
+		})
+	}
+	return infos, nil
 }
 
 func ExtractAPIOptions(meth *descriptorpb.MethodDescriptorProto) (*options.HttpRule, error) {

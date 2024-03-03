@@ -8,6 +8,8 @@ module GrpcRest
       return existing if existing
 
       descriptor = proto.class.descriptor.to_a.find { |a| a.name == name }
+      return nil if descriptor.nil?
+
       klass = descriptor.submsg_name.split('.').map(&:camelize).join('::').constantize
       sub_record = klass.new
       proto.public_send(:"#{name}=", sub_record)
@@ -18,11 +20,12 @@ module GrpcRest
       tokens = path.split('.')
       tokens[0...-1].each do |path_seg|
         proto = sub_field(proto, path_seg)
+        return if proto.nil?
       end
-      proto.public_send(:"#{tokens.last}=", value)
+      proto.public_send(:"#{tokens.last}=", value) if proto.respond_to?(:"#{tokens.last}=")
     end
 
-    def assign_params(request, param_string, body_string, params)
+    def assign_params(request, param_hash, body_string, params)
       parameters = params.to_h.deep_dup
       # each instance of {variable} means that we set the corresponding param variable into the
       # Protobuf request
@@ -30,11 +33,13 @@ module GrpcRest
       # to set it - e.g. {subrecord.foo} means we need to set the value of `request.subrecord.foo` to `params[:foo].`
       # We can also do simple wildcard replacement if there's a * - for example, {name=something-*}
       # means we should set `request.name` to "something-#{params[:name]}".
-      param_string.scan(/\{(.*?)}/).each do |match|
-        name, val = match[0].split('=')
-        val = '*' if val.blank?
-        name_tokens = name.split('.')
-        assign_value(request, name, val.gsub('*', parameters.delete(name_tokens.last)))
+      param_hash.each do |entry|
+        name_tokens = entry[:split_name]
+        value_to_use = parameters.delete(name_tokens.last)
+        if entry[:val]
+          value_to_use = value_to_use.gsub('*', entry[:val])
+        end
+        assign_value(request, entry[:name], value_to_use)
       end
       if body_string.present? && body_string != '*'
         # we need to "splat" the body parameters into the given sub-record rather than into the top-level.
@@ -45,7 +50,7 @@ module GrpcRest
       end
 
       # assign remaining parameters
-      parameters.except('action', 'controller').each do |k, v|
+      parameters.each do |k, v|
         assign_value(request, k, v)
       end
     end

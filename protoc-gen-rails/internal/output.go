@@ -27,6 +27,7 @@ type method struct {
 	Name string
 	RequestType string
 	Path string
+	PathInfo []PathInfo
 	Body string
 	HttpMethod string
 }
@@ -47,11 +48,20 @@ class {{.ControllerName}}Controller < ActionController::Base
 	rescue_from Google::Protobuf::TypeError do |e|
 		render json: GrpcRest.error_msg(e)
 	end
+  METHOD_PARAM_MAP = {
+{{range .Methods }}
+    "{{.Name}}" => [
+       {{range .PathInfo -}}
+			   {name: "{{.Name}}", val: {{if .HasValPattern}}"{{.ValPattern}}"{{else}}nil{{end}}, split_name:{{.SplitName}}},
+			 {{end -}}
+    ],
+{{end -}}
+  }.freeze
 {{$fullServiceName := .FullServiceName -}}
 {{range .Methods }}
 	def {{.Name}}
 	  grpc_request = {{.RequestType}}.new
-	  GrpcRest.assign_params(grpc_request, "{{.Path}}", "{{.Body}}", request.parameters)
+	  GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["{{.Name}}"], "{{.Body}}", request.parameters)
     render json: GrpcRest.send_request("{{$fullServiceName}}", "{{.Name}}", grpc_request)
   end
 {{end}}
@@ -73,12 +83,17 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 			return FileResult{}, routes, err
 		}
 		httpMethod, path, err := MethodAndPath(opts.Pattern)
+		pathInfo, err := ParsedPath(path)
+		if err != nil {
+			return FileResult{}, routes, err
+		}
 		controllerMethod := method{
 			Name: strcase.ToSnake(m.GetName()),
 			RequestType: Classify(m.GetInputType()),
 			Path: path,
 			HttpMethod: httpMethod,
 			Body: opts.Body,
+			PathInfo: pathInfo,
 		}
 		data.Methods = append(data.Methods, controllerMethod)
 		routes = append(routes, Route{
@@ -90,12 +105,12 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 	}
 	resultTemplate, err := template.New("controller").Parse(controllerTemplate)
 	if err != nil {
-		return FileResult{}, routes, err
+		return FileResult{}, routes, fmt.Errorf("can't parse controller template: %w", err)
 	}
 	var resultContent bytes.Buffer
 	err = resultTemplate.Execute(&resultContent, data)
 	if err != nil {
-		return FileResult{}, routes, err
+		return FileResult{}, routes, fmt.Errorf("can't execute controller template: %w", err)
 	}
 	return FileResult{
 		Content: resultContent.String(),
