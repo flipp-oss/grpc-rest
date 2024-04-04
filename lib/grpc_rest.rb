@@ -33,6 +33,29 @@ module GrpcRest
       proto.public_send(:"#{tokens.last}=", value) if proto.respond_to?(:"#{tokens.last}=")
     end
 
+    def map_wkt(proto, params)
+      proto.to_a.each do |descriptor|
+        field = descriptor.name
+        case descriptor.subtype&.name
+        when 'google.protobuf.Struct'
+          params[field] = Google::Protobuf::Struct.from_hash(params[field])
+        when 'google.protobuf.Timestamp'
+          params[field] = Google::Protobuf::Timestamp.from_time(Time.new(params[field]))
+        when 'google.protobuf.Value'
+          params[field] = Google::Protobuf::Value.from_ruby(params[field])
+        when 'google.protobuf.ListValue'
+          params[field] = Google::Protobuf::ListValue.from_a(params[field])
+        else
+          map_wkt(descriptor.subtype, params[field]) if descriptor.subtype
+        end
+      end
+    end
+
+    def init_request(request_class, params)
+      map_wkt(request_class.descriptor, params)
+      request_class.new(params)
+    end
+
     def assign_params(request, param_hash, body_string, params)
       parameters = params.to_h.deep_dup
       # each instance of {variable} means that we set the corresponding param variable into the
