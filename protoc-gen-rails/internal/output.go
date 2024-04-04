@@ -16,7 +16,6 @@ type FileResult struct {
 
 type controller struct {
 	ControllerName string
-	ServiceFilePath string
 	Methods []method
 	ServiceName string
 	FullServiceName string
@@ -41,7 +40,6 @@ type Route struct {
 
 var controllerTemplate = `
 require 'grpc_rest'
-require 'services/geo_admin/v1/test_services_pb'
 class {{.ControllerName}}Controller < ActionController::Base
   protect_from_forgery with: :null_session
 
@@ -60,8 +58,9 @@ class {{.ControllerName}}Controller < ActionController::Base
 {{$fullServiceName := .FullServiceName -}}
 {{range .Methods }}
 	def {{.Name}}
-	  grpc_request = {{.RequestType}}.new
-	  GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["{{.Name}}"], "{{.Body}}", request.parameters)
+    fields = {{.RequestType}}.descriptor.to_a.map(&:name)
+    grpc_request = {{.RequestType}}.new(request.parameters.to_h.slice(*fields))
+    GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["{{.Name}}"], "{{.Body}}", request.parameters)
     render json: GrpcRest.send_request("{{$fullServiceName}}", "{{.Name}}", grpc_request)
   end
 {{end}}
@@ -74,7 +73,6 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 		Methods: []method{},
 		ServiceName: Classify(service.GetName()),
 		ControllerName: Demodulize(service.GetName()),
-		ServiceFilePath: FilePathify(pkg + "." + service.GetName()),
 		FullServiceName: Classify(pkg + "." + service.GetName()),
 	}
 	for _, m := range service.GetMethod() {
