@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.5 - 2024-04-04
+- Parse Google Well Known Types (WKT) in request.
+
 # 0.1.4 - 2024-04-04
 - Remove geo-admin hardcoded requirement.
 - Use baked-in Protobuf initialization to support nested objects properly.
