@@ -56,11 +56,6 @@ module GrpcRest
           sub_record.public_send(:"#{key}=", parameters.delete(key))
         end
       end
-
-      # assign remaining parameters
-      parameters.each do |k, v|
-        assign_value(request, k, v)
-      end
     end
 
     def error_msg(error)
