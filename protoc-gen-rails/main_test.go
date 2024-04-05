@@ -33,7 +33,9 @@ func fileNames(directory string, appendDirectory bool, extension string) ([]stri
             return nil
         }
         files = append(files, info)
-        fullPaths = append(fullPaths, path)
+        if info.Name() != ".keep" {
+            fullPaths = append(fullPaths, path)
+        }
         if err != nil {
             fmt.Println("ERROR:", err)
         }
@@ -87,6 +89,25 @@ func runTest(t *testing.T, directory string, options map[string]string) {
 
 func Test_Base(t *testing.T) {
     runTest(t, "base", map[string]string{})
+}
+
+func Test_NoServices(t *testing.T) {
+    workdir, _ := os.Getwd()
+    tmpdir, err := os.MkdirTemp(workdir, "proto-test.")
+    if err != nil {
+        t.Fatal(err)
+    }
+    defer os.RemoveAll(tmpdir)
+
+    args := []string{
+        "-I.",
+        "--rails_out=" + tmpdir,
+    }
+    args = append(args, fmt.Sprintf("testdata/test.proto"))
+    protoc(t, args)
+
+    testDir := workdir + "/testdata/no_service"
+    assertEqualFiles(t, testDir, tmpdir)
 }
 
 func assertEqualFiles(t *testing.T, original, generated string) {
