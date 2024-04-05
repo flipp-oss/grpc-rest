@@ -49,11 +49,13 @@ func main() {
 			files = append(files, fileResult)
 		}
 	}
-	routeOutput, err := routeFile()
-	if err != nil {
-		log.Fatalf("%s", fmt.Errorf("error processing routes: %w", err))
+	if len(files) > 0 {
+		routeOutput, err := routeFile()
+		if err != nil {
+			log.Fatalf("%s", fmt.Errorf("error processing routes: %w", err))
+		}
+		files = append(files, routeOutput)
 	}
-	files = append(files, routeOutput)
 
 	// process registry
 	writeResponse(files)
