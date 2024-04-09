@@ -1,9 +1,8 @@
+require 'google/protobuf/well_known_types'
+require 'grpc'
+
 module GrpcRest
   class << self
-
-    def register_server(server)
-      @server = server
-    end
 
     def underscore(s)
       GRPC::GenericService.underscore(s)
@@ -11,7 +10,7 @@ module GrpcRest
 
     # Gets a sub record from a proto. If it doesn't exist, initialize it and set it to the proto,
     # then return it.
-    def sub_field(proto, name)
+    def sub_field(proto, name, parameters)
       existing = proto.public_send(name.to_sym)
       return existing if existing
 
@@ -19,7 +18,11 @@ module GrpcRest
       return nil if descriptor.nil?
 
       klass = descriptor.submsg_name.split('.').map(&:camelize).join('::').constantize
-      sub_record = klass.new
+      params = klass.descriptor.to_a.map(&:name).to_h do |key|
+        [key, parameters.delete(key)]
+      end
+
+      sub_record = klass.new(params)
       proto.public_send(:"#{name}=", sub_record)
       sub_record
     end
@@ -27,7 +30,7 @@ module GrpcRest
     def assign_value(proto, path, value)
       tokens = path.split('.')
       tokens[0...-1].each do |path_seg|
-        proto = sub_field(proto, path_seg)
+        proto = sub_field(proto, path_seg, {})
         return if proto.nil?
       end
       proto.public_send(:"#{tokens.last}=", value) if proto.respond_to?(:"#{tokens.last}=")
@@ -36,15 +39,22 @@ module GrpcRest
     def map_wkt(proto, params)
       proto.to_a.each do |descriptor|
         field = descriptor.name
+        val = params[field]
+        next if val.nil?
+
         case descriptor.subtype&.name
         when 'google.protobuf.Struct'
-          params[field] = Google::Protobuf::Struct.from_hash(params[field])
+          params[field] = Google::Protobuf::Struct.from_hash(val)
         when 'google.protobuf.Timestamp'
-          params[field] = Google::Protobuf::Timestamp.from_time(Time.new(params[field]))
+          if val.is_a?(Numeric)
+            params[field] = Google::Protobuf::Timestamp.from_time(Time.at(val))
+          else
+            params[field] = Google::Protobuf::Timestamp.from_time(Time.new(val))
+          end
         when 'google.protobuf.Value'
-          params[field] = Google::Protobuf::Value.from_ruby(params[field])
+          params[field] = Google::Protobuf::Value.from_ruby(val)
         when 'google.protobuf.ListValue'
-          params[field] = Google::Protobuf::ListValue.from_a(params[field])
+          params[field] = Google::Protobuf::ListValue.from_a(val)
         else
           map_wkt(descriptor.subtype, params[field]) if descriptor.subtype
         end
@@ -68,16 +78,14 @@ module GrpcRest
         name_tokens = entry[:split_name]
         value_to_use = parameters.delete(name_tokens.last)
         if entry[:val]
-          value_to_use = value_to_use.gsub('*', entry[:val])
+          regex = entry[:val].tr('*', '')
+          value_to_use = value_to_use.gsub(regex, '')
         end
         assign_value(request, entry[:name], value_to_use)
       end
       if body_string.present? && body_string != '*'
         # we need to "splat" the body parameters into the given sub-record rather than into the top-level.
-        sub_record = sub_field(request, body_string)
-        sub_record.class.descriptor.to_a.map(&:name).each do |key|
-          sub_record.public_send(:"#{key}=", parameters.delete(key))
-        end
+        sub_record = sub_field(request, body_string, parameters)
       end
     end
 
@@ -106,11 +114,8 @@ module GrpcRest
     end
 
     def send_grpc_request(service, method, request)
-      server_parts = service.split('::')
-      service_name = (server_parts[..-2].map { |p| underscore(p)} + [server_parts[-1]]).join('.')
-      route = "/#{service_name}/#{method.classify}"
-      handler = @server.send(:rpc_handlers)[route.to_sym]
-      handler.call(request)
+      klass = service.constantize::Service.subclasses.first
+      klass.new.public_send(method, request)
     end
 
     def send_request(service, method, request)
