@@ -51,7 +51,7 @@ func SanitizePath(s string) string {
 		if dot != -1 {
 			repl = repl[dot+1:]
 		}
-		s = strings.Replace(s, match[0], ":"+repl, 1)
+		s = strings.Replace(s, match[0], "*"+repl, 1)
 	}
   return s
 }

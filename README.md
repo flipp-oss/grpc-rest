@@ -79,7 +79,7 @@ plugins:
   - name: rails
     out: .
 ```
-    
+
 Then, you can run `buf generate` to generate the Ruby files. This will generate:
 * the Protobuf Ruby files for grpc, in `app/gen`
 * A new route file, in `config/routes/grpc.rb`
@@ -126,39 +126,23 @@ Rails.application.routes.draw do
 end
 ```
 
-### Hooking up Callbacks
+## Caveats
 
-If you're using [gruf](https://github.com/bigcommerce/gruf), as long as your Gruf controllers are loaded on application load, you don't have to do anything else - grpc-rest will automatically hook the callbacks up. If you're not, you have to tell GrpcRest about your server. An example might look like this:
-
-```ruby
-# grpc_setup.rb, a shared library file somewhere in the app
-
-def grpc_server
-  s = GRPC::RpcServer.new
-  s.handle(MyImpl.new) # handler inheriting from your service class - see https://grpc.io/docs/languages/ruby/basics/
-  s
-end
-
-# startup script for gRPC
-
-require "grpc_setup"
-server = grpc_server
-server.run_till_terminated_or_interrupted([1, 'int', 'SIGQUIT'])
-
-# Rails initializer
-require "grpc_setup"
-server = grpc_server
-GrpcRest.register_server(server)
-```
+This gem does not currently support the full path expression capabilities of grpc-gateway or the Google [http proto](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto). It only supports very basic single wildcard globbing (`*`). Contributions are welcome for more complex cases if they are needed.
 
 ## To Do
 
-* Support repeated fields via comma-separation (matches grpc-gateway, but is it really useful?)
-* Install via homebrew and/or have the binary in the gem itself
+* Replace Go implementation with Ruby (+ executable) once [service and method lookup](https://github.com/protocolbuffers/protobuf/pull/15817) is released.
 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/flipp-oss/grpc-rest.
+
+To regenerate Ruby protobuf code for tests, install the `grpc-tools` gem and run this from the base directory:
+
+```
+grpc_tools_ruby_protoc -I=./protoc-gen-rails/testdata --proto_path=./protoc-gen-rails/google-deps --ruby_out=./spec --grpc_out=./spec ./protoc-gen-rails/testdata/test_service.proto
+```
 
 ## License
 
