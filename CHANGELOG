@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.9 - 2024-04-09
+- Added tests.
+- Fixed some bugs around path globbing.
+
 # 0.1.6 - 2024-04-05
 - Fixed bug where a blank routes file would be emitted when no services were found.
 - Added a comment line indicating that files are auto-generated.
