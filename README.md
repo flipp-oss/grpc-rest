@@ -125,7 +125,7 @@ Rails.application.routes.draw do
   draw(:grpc) # Add this line
 end
 ```
-
+ 
 ## Caveats
 
 This gem does not currently support the full path expression capabilities of grpc-gateway or the Google [http proto](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto). It only supports very basic single wildcard globbing (`*`). Contributions are welcome for more complex cases if they are needed.
