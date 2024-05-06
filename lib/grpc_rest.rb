@@ -41,6 +41,7 @@ module GrpcRest
         field = descriptor.name
         val = params[field]
         next if val.nil?
+        next if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
 
         case descriptor.subtype&.name
         when 'google.protobuf.Struct'
