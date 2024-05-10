@@ -114,4 +114,21 @@ RSpec.describe MyServiceController, type: :request do
     end
   end
 
+  describe 'array of sub-records' do
+    it 'should be successful' do
+      params = {
+        sub_records: [{
+          sub_id: 'id1',
+          another_id: 'id2'
+        }]
+      }
+
+      post '/test4', params:, as: :json
+      expect(response).to be_successful
+      expect(response.parsed_body).to eq({
+                                           'some_int' => 4,
+                                           'full_response' => %({"subRecords":[{"subId":"id1","anotherId":"id2"}]})
+                                         })
+    end
+  end
 end

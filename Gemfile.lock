@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grpc-rest (0.1.9)
+    grpc-rest (0.1.10)
       grpc
       rails (>= 6.0)
 
@@ -74,6 +74,7 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
     builder (3.2.4)
+    byebug (11.1.3)
     concurrent-ruby (1.2.3)
     crass (1.0.6)
     date (3.3.4)
@@ -183,6 +184,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  byebug
   grpc-rest!
   rspec-rails
 

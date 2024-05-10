@@ -57,7 +57,13 @@ module GrpcRest
         when 'google.protobuf.ListValue'
           params[field] = Google::Protobuf::ListValue.from_a(val)
         else
-          map_wkt(descriptor.subtype, params[field]) if descriptor.subtype
+          if params[field].is_a?(Array)
+            params[field].each do |item|
+              map_wkt(descriptor.subtype, item)
+            end
+          else
+            map_wkt(descriptor.subtype, params[field])
+          end
         end
       end
     end
