@@ -16,6 +16,7 @@ message TestRequest {
   google.protobuf.Timestamp timestamp_field = 7;
   google.protobuf.ListValue list_value = 8;
   google.protobuf.Value bare_value = 9;
+  repeated SubRecord sub_records = 10;
 }
 
 message SubRecord {
