@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+- Parse numbers into Ruby number objects.
+
 # 0.1.10 - 2024-04-06
 - Fix incorrect decoding of enum descriptors.
 
