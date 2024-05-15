@@ -66,6 +66,7 @@ RSpec.describe MyServiceController, type: :request do
     it 'should be successful' do
       params = {
         test_id: 'abc',
+        some_int: "65",
         foobar: 'xyz',
         repeated_string: ['W', 'T', 'F'],
         sub_record: {
@@ -95,7 +96,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'some_int' => 4,
-                                           'full_response' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45})
+                                           'full_response' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,\"someInt\":65})
                                          })
     end
   end

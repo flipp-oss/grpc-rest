@@ -36,12 +36,21 @@ module GrpcRest
       proto.public_send(:"#{tokens.last}=", value) if proto.respond_to?(:"#{tokens.last}=")
     end
 
-    def map_wkt(proto, params)
+    def map_proto_type(proto, params)
       proto.to_a.each do |descriptor|
         field = descriptor.name
         val = params[field]
         next if val.nil?
         next if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
+
+        case descriptor.type
+        when *%i(int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64)
+          params[field] = val.to_i
+        when *%i(float double)
+          params[field] = val.to_f
+        when :bool
+          params[field] = !!val
+        end
 
         case descriptor.subtype&.name
         when 'google.protobuf.Struct'
@@ -59,17 +68,17 @@ module GrpcRest
         else
           if params[field].is_a?(Array)
             params[field].each do |item|
-              map_wkt(descriptor.subtype, item)
+              map_proto_type(descriptor.subtype, item)
             end
           else
-            map_wkt(descriptor.subtype, params[field])
+            map_proto_type(descriptor.subtype, params[field])
           end
         end
       end
     end
 
     def init_request(request_class, params)
-      map_wkt(request_class.descriptor, params)
+      map_proto_type(request_class.descriptor, params)
       request_class.new(params)
     end
 

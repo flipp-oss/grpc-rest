@@ -17,6 +17,7 @@ message TestRequest {
   google.protobuf.ListValue list_value = 8;
   google.protobuf.Value bare_value = 9;
   repeated SubRecord sub_records = 10;
+  int32 some_int = 11;
 }
 
 message SubRecord {
