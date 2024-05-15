@@ -66,7 +66,7 @@ RSpec.describe MyServiceController, type: :request do
     it 'should be successful' do
       params = {
         test_id: 'abc',
-        some_int: 65,
+        some_int: "65",
         foobar: 'xyz',
         repeated_string: ['W', 'T', 'F'],
         sub_record: {

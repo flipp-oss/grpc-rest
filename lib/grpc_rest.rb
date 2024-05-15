@@ -44,11 +44,11 @@ module GrpcRest
         next if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
 
         case descriptor.type
-        when 'int32', 'int64', 'uint32', 'uint64', 'sint32', 'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64'
+        when *%i(int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64)
           params[field] = val.to_i
-        when 'float', 'double'
+        when *%i(float double)
           params[field] = val.to_f
-        when 'bool'
+        when :bool
           params[field] = !!val
         end
 
