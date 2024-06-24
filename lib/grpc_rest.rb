@@ -141,10 +141,10 @@ module GrpcRest
           k.bound_service == service_obj
         end
         if klass
-          return send_gruf_request(klass, service_obj, method, request).to_h
+          return send_gruf_request(klass, service_obj, method, request)
         end
       end
-      send_grpc_request(service, method, request).to_h
+      send_grpc_request(service, method, request)
     end
   end
 
