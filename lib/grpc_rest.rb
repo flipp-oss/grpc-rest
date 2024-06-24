@@ -79,7 +79,7 @@ module GrpcRest
 
     def init_request(request_class, params)
       map_proto_type(request_class.descriptor, params)
-      request_class.new(params)
+      request_class.decode_json(JSON.generate(params))
     end
 
     def assign_params(request, param_hash, body_string, params)
@@ -141,10 +141,10 @@ module GrpcRest
           k.bound_service == service_obj
         end
         if klass
-          return send_gruf_request(klass, service_obj, method, request).to_h
+          return send_gruf_request(klass, service_obj, method, request)
         end
       end
-      send_grpc_request(service, method, request).to_h
+      send_grpc_request(service, method, request)
     end
   end
 
