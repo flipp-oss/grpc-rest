@@ -28,8 +28,8 @@ RSpec.describe MyServiceController, type: :request do
       get "/test/blah/xyz?test_id=abc"
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
-                                           'some_int' => 1,
-                                           'full_response' => %({"testId":"abc","foobar":"xyz"})
+                                           'someInt' => 1,
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz"})
                                          })
     end
   end
@@ -44,8 +44,8 @@ RSpec.describe MyServiceController, type: :request do
       post '/test2?test_id=abc&foobar=xyz&timestamp_field=2024-04-03+01:02:03+UTC', params: params, as: :json
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
-                                           'some_int' => 2,
-                                           'full_response' => %({"testId":"abc","foobar":"xyz","secondRecord":{"subId":"id1","anotherId":"id2"},"timestampField":"2024-04-03T01:02:03Z"})
+                                           'someInt' => 2,
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","secondRecord":{"subId":"id1","anotherId":"id2"},"timestampField":"2024-04-03T01:02:03Z"})
                                          })
     end
 
@@ -56,8 +56,8 @@ RSpec.describe MyServiceController, type: :request do
       post '/test3/xyz?test_id=abc'
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
-                                           'some_int' => 3,
-                                           'full_response' => %({"testId":"abc","subRecord":{"subId":"xyz"}})
+                                           'someInt' => 3,
+                                           'fullResponse' => %({"testId":"abc","subRecord":{"subId":"xyz"}})
                                          })
     end
   end
@@ -95,8 +95,8 @@ RSpec.describe MyServiceController, type: :request do
       post '/test4', params: params, as: :json
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
-                                           'some_int' => 4,
-                                           'full_response' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,\"someInt\":65})
+                                           'someInt' => 4,
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,\"someInt\":65})
                                          })
     end
   end
@@ -109,8 +109,8 @@ RSpec.describe MyServiceController, type: :request do
       post "/test4", params: params, as: :json
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
-                                           'some_int' => 4,
-                                           'full_response' => %({"timestampField":"2024-04-09T19:54:12Z"})
+                                           'someInt' => 4,
+                                           'fullResponse' => %({"timestampField":"2024-04-09T19:54:12Z"})
                                          })
     end
   end
@@ -127,8 +127,8 @@ RSpec.describe MyServiceController, type: :request do
       post '/test4', params:, as: :json
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
-                                           'some_int' => 4,
-                                           'full_response' => %({"subRecords":[{"subId":"id1","anotherId":"id2"}]})
+                                           'someInt' => 4,
+                                           'fullResponse' => %({"subRecords":[{"subId":"id1","anotherId":"id2"}]})
                                          })
     end
   end
