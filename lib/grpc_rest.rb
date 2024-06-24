@@ -79,7 +79,7 @@ module GrpcRest
 
     def init_request(request_class, params)
       map_proto_type(request_class.descriptor, params)
-      request_class.new(params)
+      request_class.decode_json(params.to_json)
     end
 
     def assign_params(request, param_hash, body_string, params)
