@@ -106,6 +106,7 @@ module GrpcRest
       end
     end
 
+    # Ported from https://github.com/grpc-ecosystem/grpc-gateway/blob/main/runtime/errors.go#L36
     def grpc_http_status(code)
       case code
       when GRPC::Core::StatusCodes::OK
