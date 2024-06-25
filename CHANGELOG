@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.14 - 2024-06-25
+- Emit the correct error code on failure.
+
+# 0.1.13 - 2024-06-24
+- Use grpc's `to_json` methods to output fields correctly.
+
 # 0.1.12 - 2024-05-15
 - Parse numbers into Ruby number objects.
 
