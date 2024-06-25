@@ -1,5 +1,6 @@
 require 'google/protobuf/well_known_types'
 require 'grpc'
+require 'grpc/core/status_codes'
 
 module GrpcRest
   class << self
@@ -105,16 +106,60 @@ module GrpcRest
       end
     end
 
+    # Ported from https://github.com/grpc-ecosystem/grpc-gateway/blob/main/runtime/errors.go#L36
+    def grpc_http_status(code)
+      case code
+      when GRPC::Core::StatusCodes::OK
+        :ok
+      when GRPC::Core::StatusCodes::CANCELLED
+        499
+      when GRPC::Core::StatusCodes::INVALID_ARGUMENT,
+        GRPC::Core::StatusCodes::FAILED_PRECONDITION,
+        GRPC::Core::StatusCodes::OUT_OF_RANGE
+        :bad_request
+      when GRPC::Core::StatusCodes::DEADLINE_EXCEEDED
+        :gateway_timeout
+      when GRPC::Core::StatusCodes::NOT_FOUND
+        :not_found
+      when GRPC::Core::StatusCodes::ALREADY_EXISTS, GRPC::Core::StatusCodes::ABORTED
+        :conflict
+      when GRPC::Core::StatusCodes::PERMISSION_DENIED
+        :forbidden
+      when GRPC::Core::StatusCodes::UNAUTHENTICATED
+        :unauthorized
+      when GRPC::Core::StatusCodes::RESOURCE_EXHAUSTED
+        :too_many_requests
+      when GRPC::Core::StatusCodes::UNIMPLEMENTED
+        :not_implemented
+      when GRPC::Core::StatusCodes::UNAVAILABLE
+        :service_unavailable
+      else
+        :internal_server_error
+      end
+    end
+
     def error_msg(error)
+      if error.respond_to?(:code)
       {
-          code: 3,
-          message: "InvalidArgument: #{error.message}",
+          code: error.code,
+          message: error.message,
           details: [
                     {
                       backtrace: error.backtrace
                     }
           ]
       }
+      else
+        {
+            code: 3,
+            message: "InvalidArgument: #{error.message}",
+            details: [
+                      {
+                        backtrace: error.backtrace
+                      }
+            ]
+        }
+      end
     end
 
     def send_gruf_request(klass, service_obj, method, request)

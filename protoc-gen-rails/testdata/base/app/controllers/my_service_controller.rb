@@ -6,8 +6,14 @@ class MyServiceController < ActionController::Base
   protect_from_forgery with: :null_session
 
 	rescue_from StandardError do |e|
-		render json: GrpcRest.error_msg(e)
+		render json: GrpcRest.error_msg(e), status: :internal_server_error
 	end
+  rescue_from GRPC::BadStatus do |e|
+		render json: GrpcRest.error_msg(e), status: :internal_server_error
+  end
+  rescue_from Google::Protobuf::TypeError do |e|
+    render json: GrpcRest.error_msg(e), status: :bad_request
+  end
   METHOD_PARAM_MAP = {
 
     "test" => [
