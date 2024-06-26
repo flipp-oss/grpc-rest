@@ -9,7 +9,7 @@ class MyServiceController < ActionController::Base
 		render json: GrpcRest.error_msg(e), status: :internal_server_error
 	end
   rescue_from GRPC::BadStatus do |e|
-		render json: GrpcRest.error_msg(e), status: :internal_server_error
+		render json: GrpcRest.error_msg(e), status: GrpcRest.grpc_http_status(e.code)
   end
   rescue_from Google::Protobuf::TypeError do |e|
     render json: GrpcRest.error_msg(e), status: :bad_request
