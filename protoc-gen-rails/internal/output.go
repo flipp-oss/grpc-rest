@@ -1,39 +1,40 @@
 package internal
 
 import (
-  "bytes"
-  "fmt"
-  "github.com/iancoleman/strcase"
-  "google.golang.org/protobuf/types/descriptorpb"
+	"bytes"
+	"fmt"
 	"strings"
 	"text/template"
+
+	"github.com/iancoleman/strcase"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 type FileResult struct {
-	Name string
+	Name    string
 	Content string
 }
 
 type controller struct {
-	ControllerName string
-	Methods []method
-	ServiceName string
+	ControllerName  string
+	Methods         []method
+	ServiceName     string
 	FullServiceName string
-	MethodName string
+	MethodName      string
 }
 
 type method struct {
-	Name string
+	Name        string
 	RequestType string
-	Path string
-	PathInfo []PathInfo
-	Body string
-	HttpMethod string
+	Path        string
+	PathInfo    []PathInfo
+	Body        string
+	HttpMethod  string
 }
 
 type Route struct {
 	MethodName string
-	Path string
+	Path       string
 	Controller string
 	HttpMethod string
 }
@@ -66,8 +67,9 @@ class {{.ControllerName}}Controller < ActionController::Base
 {{$fullServiceName := .FullServiceName -}}
 {{range .Methods }}
 	def {{.Name}}
-    fields = {{.RequestType}}.descriptor.to_a.map { |f| f.name.underscore }
-    grpc_request = GrpcRest.init_request({{.RequestType}}, request.parameters.to_h.slice(*fields))
+    fields = {{.RequestType}}.descriptor.to_a.map(&:name)
+    parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
+    grpc_request = GrpcRest.init_request({{.RequestType}}, parameters.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["{{.Name}}"], "{{.Body}}", request.parameters)
     render json: GrpcRest.send_request("{{$fullServiceName}}", "{{.Name}}", grpc_request)
   end
@@ -76,11 +78,11 @@ end
 `
 
 func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (FileResult, []Route, error) {
-  var routes []Route
+	var routes []Route
 	data := controller{
-		Methods: []method{},
-		ServiceName: Classify(service.GetName()),
-		ControllerName: Demodulize(service.GetName()),
+		Methods:         []method{},
+		ServiceName:     Classify(service.GetName()),
+		ControllerName:  Demodulize(service.GetName()),
 		FullServiceName: Classify(pkg + "." + service.GetName()),
 	}
 	for _, m := range service.GetMethod() {
@@ -94,17 +96,17 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 			return FileResult{}, routes, err
 		}
 		controllerMethod := method{
-			Name: strcase.ToSnake(m.GetName()),
+			Name:        strcase.ToSnake(m.GetName()),
 			RequestType: Classify(m.GetInputType()),
-			Path: path,
-			HttpMethod: httpMethod,
-			Body: opts.Body,
-			PathInfo: pathInfo,
+			Path:        path,
+			HttpMethod:  httpMethod,
+			Body:        opts.Body,
+			PathInfo:    pathInfo,
 		}
 		data.Methods = append(data.Methods, controllerMethod)
 		routes = append(routes, Route{
 			HttpMethod: strings.ToLower(httpMethod),
-			Path: SanitizePath(path),
+			Path:       SanitizePath(path),
 			Controller: strcase.ToSnake(data.ControllerName),
 			MethodName: strcase.ToSnake(m.GetName()),
 		})
@@ -120,7 +122,7 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 	}
 	return FileResult{
 		Content: resultContent.String(),
-		Name: fmt.Sprintf("app/controllers/%s_controller.rb", strcase.ToSnake(data.ControllerName)),
+		Name:    fmt.Sprintf("app/controllers/%s_controller.rb", strcase.ToSnake(data.ControllerName)),
 	}, routes, nil
 }
 
