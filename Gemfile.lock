@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grpc-rest (0.1.15)
+    grpc-rest (0.1.16)
       grpc
       rails (>= 6.0)
 
