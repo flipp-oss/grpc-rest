@@ -33,28 +33,32 @@ class MyServiceController < ActionController::Base
 
 	def test
     fields = Testdata::TestRequest.descriptor.to_a.map(&:name)
-    grpc_request = GrpcRest.init_request(Testdata::TestRequest, request.parameters.to_h.slice(*fields))
+    parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
+    grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test"], "", request.parameters)
     render json: GrpcRest.send_request("Testdata::MyService", "test", grpc_request)
   end
 
 	def test_2
     fields = Testdata::TestRequest.descriptor.to_a.map(&:name)
-    grpc_request = GrpcRest.init_request(Testdata::TestRequest, request.parameters.to_h.slice(*fields))
+    parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
+    grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test_2"], "second_record", request.parameters)
     render json: GrpcRest.send_request("Testdata::MyService", "test_2", grpc_request)
   end
 
 	def test_3
     fields = Testdata::TestRequest.descriptor.to_a.map(&:name)
-    grpc_request = GrpcRest.init_request(Testdata::TestRequest, request.parameters.to_h.slice(*fields))
+    parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
+    grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test_3"], "", request.parameters)
     render json: GrpcRest.send_request("Testdata::MyService", "test_3", grpc_request)
   end
 
 	def test_4
     fields = Testdata::TestRequest.descriptor.to_a.map(&:name)
-    grpc_request = GrpcRest.init_request(Testdata::TestRequest, request.parameters.to_h.slice(*fields))
+    parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
+    grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test_4"], "*", request.parameters)
     render json: GrpcRest.send_request("Testdata::MyService", "test_4", grpc_request)
   end
