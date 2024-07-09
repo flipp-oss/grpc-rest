@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.16 - 2024-07-09
+- Support requests in camel case
+
 # 0.1.15 - 2024-06-26
 - Actually emit the correct error code on failure. :(
 
