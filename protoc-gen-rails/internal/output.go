@@ -66,7 +66,7 @@ class {{.ControllerName}}Controller < ActionController::Base
 {{$fullServiceName := .FullServiceName -}}
 {{range .Methods }}
 	def {{.Name}}
-    fields = {{.RequestType}}.descriptor.to_a.map(&:name)
+    fields = {{.RequestType}}.descriptor.to_a.map { |f| f.name.underscore }
     grpc_request = GrpcRest.init_request({{.RequestType}}, request.parameters.to_h.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["{{.Name}}"], "{{.Body}}", request.parameters)
     render json: GrpcRest.send_request("{{$fullServiceName}}", "{{.Name}}", grpc_request)
