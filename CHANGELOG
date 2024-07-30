@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.17 - 2024-07-30
+- Ignore unknown fields in JSON decoding
+
 # 0.1.16 - 2024-07-09
 - Support requests in camel case
 
