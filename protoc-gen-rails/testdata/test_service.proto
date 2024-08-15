@@ -18,6 +18,7 @@ message TestRequest {
   google.protobuf.Value bare_value = 9;
   repeated SubRecord sub_records = 10;
   int32 some_int = 11;
+  TestEnum some_enum = 12;
 }
 
 message SubRecord {
@@ -28,6 +29,12 @@ message SubRecord {
 message TestResponse {
   int32 some_int = 1;
   string full_response = 2;
+}
+
+enum TestEnum {
+  TEST_ENUM_UNSPECIFIED = 0;
+  TEST_ENUM_FOO = 1;
+  TEST_ENUM_BAR = 2;
 }
 
 service MyService {
