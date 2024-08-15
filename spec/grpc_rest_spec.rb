@@ -63,8 +63,8 @@ RSpec.describe MyServiceController, type: :request do
   end
 
   describe 'full body splat' do
-    it 'should be successful' do
-      params = {
+    let(:params) do
+      {
         test_id: 'abc',
         some_int: "65",
         foobar: 'xyz',
@@ -91,12 +91,26 @@ RSpec.describe MyServiceController, type: :request do
         list_value: ['F', 'Y', 'I'],
         bare_value: 45,
         timestamp_field: '2024-04-03 01:02:03 UTC',
+        some_enum: 'TEST_ENUM_FOO'
       }
+    end
+
+    it 'should be successful' do
       post '/test4', params: params, as: :json
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,\"someInt\":65})
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO"})
+                                         })
+    end
+
+    it 'should be successful without the enum prefix' do
+      params[:some_enum] = 'FOO'
+      post '/test4', params: params, as: :json
+      expect(response).to be_successful
+      expect(response.parsed_body).to eq({
+                                           'someInt' => 4,
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO"})
                                          })
     end
   end

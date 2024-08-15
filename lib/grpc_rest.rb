@@ -37,12 +37,45 @@ module GrpcRest
       proto.public_send(:"#{tokens.last}=", value) if proto.respond_to?(:"#{tokens.last}=")
     end
 
+    # https://stackoverflow.com/a/2158473/5199431
+    def longest_common_substring(arr)
+      return "" if arr.empty?
+
+      result = 0
+      first_val = arr[0]
+      (0...first_val.length).each do |k|
+        all_matched = true
+        character = first_val[k]
+        arr.each { |str| all_matched &= (character == str[k]) }
+        break unless all_matched
+        result += 1
+      end
+      first_val.slice(0, result)
+    end
+
+    def handle_enum_values(descriptor, value)
+      names = descriptor.subtype.to_h.keys.map(&:to_s)
+      prefix = longest_common_substring(names)
+      if prefix.present? && !value.starts_with?(prefix)
+        "#{prefix}#{value}"
+      else
+        value
+      end
+    end
+
     def map_proto_type(proto, params)
       proto.to_a.each do |descriptor|
         field = descriptor.name
         val = params[field]
         next if val.nil?
-        next if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
+        if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
+          if descriptor.label == :repeated
+            params[field] = val.map { |v| handle_enum_values(descriptor, v)}
+          else
+            params[field] = handle_enum_values(descriptor, val)
+          end
+          next
+        end
 
         case descriptor.type
         when *%i(int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64)

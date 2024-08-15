@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+- Automatically add prefixes to enum values if not provided
+
 # 0.1.17 - 2024-07-30
 - Ignore unknown fields in JSON decoding
 
