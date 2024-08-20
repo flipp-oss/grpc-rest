@@ -30,6 +30,17 @@ type method struct {
 	PathInfo    []PathInfo
 	Body        string
 	HttpMethod  string
+	RestOptions string
+}
+
+func rubyRestOptions(restOptions map[string]bool) string {
+	var opts []string
+	for opt, val := range restOptions {
+		if val {
+			opts = append(opts, fmt.Sprintf("%v: true", opt))
+		}
+	}
+	return "{" + strings.Join(opts, ", ") + "}"
 }
 
 type Route struct {
@@ -71,7 +82,7 @@ class {{.ControllerName}}Controller < ActionController::Base
     parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
     grpc_request = GrpcRest.init_request({{.RequestType}}, parameters.slice(*fields))
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["{{.Name}}"], "{{.Body}}", request.parameters)
-    render json: GrpcRest.send_request("{{$fullServiceName}}", "{{.Name}}", grpc_request)
+    render json: GrpcRest.send_request("{{$fullServiceName}}", "{{.Name}}", grpc_request, {{.RestOptions}})
   end
 {{end}}
 end
@@ -90,18 +101,21 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 		if err != nil {
 			return FileResult{}, routes, err
 		}
+		restOpts, err := ExtractRestOptions(m)
+		if err != nil { return FileResult{}, routes, err }
 		httpMethod, path, err := MethodAndPath(opts.Pattern)
 		pathInfo, err := ParsedPath(path)
 		if err != nil {
 			return FileResult{}, routes, err
 		}
 		controllerMethod := method{
-			Name:        strcase.ToSnake(m.GetName()),
-			RequestType: Classify(m.GetInputType()),
-			Path:        path,
-			HttpMethod:  httpMethod,
-			Body:        opts.Body,
-			PathInfo:    pathInfo,
+			Name:           strcase.ToSnake(m.GetName()),
+			RequestType:    Classify(m.GetInputType()),
+			Path:           path,
+			RestOptions:    rubyRestOptions(restOpts),
+			HttpMethod:     httpMethod,
+			Body:           opts.Body,
+			PathInfo:       pathInfo,
 		}
 		data.Methods = append(data.Methods, controllerMethod)
 		routes = append(routes, Route{

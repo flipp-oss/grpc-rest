@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+- Add `emit_defaults` extension for JSON responses.
+
 # 0.1.18 - 2024-08-15
 - Automatically add prefixes to enum values if not provided
 

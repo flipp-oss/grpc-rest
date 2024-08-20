@@ -5,6 +5,7 @@ package testdata;
 import "google/api/annotations.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 message TestRequest {
   string test_id = 1;
@@ -29,6 +30,7 @@ message SubRecord {
 message TestResponse {
   int32 some_int = 1;
   string full_response = 2;
+  string ignored_key = 3;
 }
 
 enum TestEnum {
@@ -41,6 +43,14 @@ service MyService {
   rpc Test(TestRequest) returns (TestResponse) {
     option (google.api.http) = {
       get: "/test/{foobar=blah/*}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      extensions: {
+        key: 'x-grpc-rest-emit-defaults';
+        value: {
+          bool_value: true;
+        }
+      }
     };
   }
 
