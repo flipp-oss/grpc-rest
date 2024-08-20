@@ -11,6 +11,13 @@ GrpcApp.initialize!
 
 require 'rspec/rails'
 
+loader = Zeitwerk::Loader.new
+loader.push_dir('./spec')
+loader.inflector.inflect('protoc-gen-openapiv2' => 'ProtocGenOpenapiv2')
+loader.ignore("#{Rails.root}/spec/test_service_pb.rb")
+loader.setup
+require "#{Rails.root}/spec/test_service_pb.rb"
+
 $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 
 RSpec.configure do |config|

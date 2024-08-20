@@ -212,7 +212,7 @@ module GrpcRest
       klass.new.public_send(method, request)
     end
 
-    def send_request(service, method, request)
+    def get_response(service, method, request)
       if defined?(Gruf)
         service_obj = service.constantize::Service
         klass = ::Gruf::Controllers::Base.subclasses.find do |k|
@@ -223,6 +223,15 @@ module GrpcRest
         end
       end
       send_grpc_request(service, method, request)
+    end
+
+    def send_request(service, method, request, options={})
+      response = get_response(service, method, request)
+      if options[:emit_defaults]
+        response.to_json(emit_defaults: true)
+      else
+        response
+      end
     end
   end
 

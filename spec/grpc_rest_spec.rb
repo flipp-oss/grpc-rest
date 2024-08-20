@@ -29,7 +29,8 @@ RSpec.describe MyServiceController, type: :request do
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 1,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz"})
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz"}),
+                                           "ignoredKey" => ''
                                          })
     end
   end

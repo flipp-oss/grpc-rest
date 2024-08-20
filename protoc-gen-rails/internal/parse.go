@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
   options "google.golang.org/genproto/googleapis/api/annotations"
+	options2 "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
   "google.golang.org/protobuf/proto"
   "google.golang.org/protobuf/types/descriptorpb"
 	"regexp"
@@ -79,4 +80,22 @@ func ExtractAPIOptions(meth *descriptorpb.MethodDescriptorProto) (*options.HttpR
 	return opts, nil
 }
 
+func ExtractRestOptions(meth *descriptorpb.MethodDescriptorProto) (map[string]bool, error) {
+	if meth.Options == nil {
+		return nil, nil
+	}
+	if !proto.HasExtension(meth.Options, options2.E_Openapiv2Operation) {
+		return nil, nil
+	}
+	ext := proto.GetExtension(meth.Options, options2.E_Openapiv2Operation)
+	operation, ok := ext.(*options2.Operation)
+	if !ok {
+		return nil, fmt.Errorf("extension is %T; want an Operation", ext)
+	}
+	operationExt := operation.GetExtensions()
+	emitDefaults := operationExt["x-grpc-rest-emit-defaults"].GetBoolValue()
+	return map[string]bool{
+		"emit_defaults": emitDefaults,
+	}, nil
+}
 

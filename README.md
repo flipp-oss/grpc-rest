@@ -130,9 +130,32 @@ end
 
 This gem does not currently support the full path expression capabilities of grpc-gateway or the Google [http proto](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto). It only supports very basic single wildcard globbing (`*`). Contributions are welcome for more complex cases if they are needed.
 
+## Proto Options
+
+By default, grpc-rest uses the Protobuf default of omitting empty values on response. You can change this behavior by using an OpenAPI extension with the key `x-grpc-rest-emit-defaults`:
+
+```protobuf
+service MyService {
+  rpc Test(MyRequest) returns (MyResponse) {
+    option (google.api.http) = {
+      get: "/test/"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      extensions: {
+        key: 'x-grpc-rest-emit-defaults';
+        value: {
+          bool_value: true;
+        }
+      }
+    };
+  }
+}
+```
+
+
 ## To Do
 
-* Replace Go implementation with Ruby (+ executable) once [service and method lookup](https://github.com/protocolbuffers/protobuf/pull/15817) is released.
+* Replace Go implementation with Ruby (+ executable)
 
 ## Contributing
 
