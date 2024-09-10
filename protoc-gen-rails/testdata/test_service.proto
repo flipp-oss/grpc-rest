@@ -20,6 +20,7 @@ message TestRequest {
   repeated SubRecord sub_records = 10;
   int32 some_int = 11;
   TestEnum some_enum = 12;
+  repeated float repeated_float = 13;
 }
 
 message SubRecord {

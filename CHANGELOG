@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.20 - 2024-09-10
+- Fix: Repeated float values weren't being treated as arrays and were crashing.
+
 # 0.1.19 - 2024-08-22
 
 - Add `emit_defaults` extension for JSON responses.
