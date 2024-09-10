@@ -63,56 +63,55 @@ module GrpcRest
       end
     end
 
-    def map_proto_type(proto, params)
+    def map_proto_type(descriptor, val)
+      if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
+        return handle_enum_values(descriptor, val)
+      end
+
+      case descriptor.type
+      when *%i(int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64)
+        return val.to_i
+      when *%i(float double)
+        return val.to_f
+      when :bool
+        return !!val
+      end
+
+      case descriptor.subtype&.name
+      when 'google.protobuf.Struct'
+        return Google::Protobuf::Struct.from_hash(val)
+      when 'google.protobuf.Timestamp'
+        if val.is_a?(Numeric)
+          return Google::Protobuf::Timestamp.from_time(Time.at(val))
+        else
+          return Google::Protobuf::Timestamp.from_time(Time.new(val))
+        end
+      when 'google.protobuf.Value'
+        return Google::Protobuf::Value.from_ruby(val)
+      when 'google.protobuf.ListValue'
+        return Google::Protobuf::ListValue.from_a(val)
+      else
+        return map_proto_record(descriptor.subtype, val)
+      end
+    end
+
+    def map_proto_record(proto, params)
       proto.to_a.each do |descriptor|
         field = descriptor.name
         val = params[field]
         next if val.nil?
-        if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
-          if descriptor.label == :repeated
-            params[field] = val.map { |v| handle_enum_values(descriptor, v)}
-          else
-            params[field] = handle_enum_values(descriptor, val)
-          end
-          next
-        end
 
-        case descriptor.type
-        when *%i(int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64)
-          params[field] = val.to_i
-        when *%i(float double)
-          params[field] = val.to_f
-        when :bool
-          params[field] = !!val
-        end
-
-        case descriptor.subtype&.name
-        when 'google.protobuf.Struct'
-          params[field] = Google::Protobuf::Struct.from_hash(val)
-        when 'google.protobuf.Timestamp'
-          if val.is_a?(Numeric)
-            params[field] = Google::Protobuf::Timestamp.from_time(Time.at(val))
-          else
-            params[field] = Google::Protobuf::Timestamp.from_time(Time.new(val))
-          end
-        when 'google.protobuf.Value'
-          params[field] = Google::Protobuf::Value.from_ruby(val)
-        when 'google.protobuf.ListValue'
-          params[field] = Google::Protobuf::ListValue.from_a(val)
+        if descriptor.label == :repeated
+          params[field] = val.map { |v| map_proto_type(descriptor, v) }
         else
-          if params[field].is_a?(Array)
-            params[field].each do |item|
-              map_proto_type(descriptor.subtype, item)
-            end
-          else
-            map_proto_type(descriptor.subtype, params[field])
-          end
+          params[field] = map_proto_type(descriptor, val)
         end
       end
+      params
     end
 
     def init_request(request_class, params)
-      map_proto_type(request_class.descriptor, params)
+      map_proto_record(request_class.descriptor, params)
       request_class.decode_json(JSON.generate(params), ignore_unknown_fields: true)
     end
 

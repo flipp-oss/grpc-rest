@@ -67,6 +67,7 @@ RSpec.describe MyServiceController, type: :request do
     let(:params) do
       {
         test_id: 'abc',
+        repeated_float: [1.0, 2.0],
         some_int: "65",
         foobar: 'xyz',
         repeated_string: ['W', 'T', 'F'],
@@ -101,7 +102,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO"})
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2]})
                                          })
     end
 
@@ -111,7 +112,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO"})
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2]})
                                          })
     end
   end
