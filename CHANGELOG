@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.21 - 2024-09-12
 - Feature: Support gruf Interceptors.
 
 # 0.1.20 - 2024-09-10
