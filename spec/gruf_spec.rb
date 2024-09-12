@@ -2,7 +2,7 @@ require_relative './spec_helper'
 require_relative './test_service_services_pb'
 require 'gruf'
 
-class ServerImpl < Gruf::Controllers::Base
+class GrufServerImpl < Gruf::Controllers::Base
 
   bind ::Testdata::MyService::Service
 
@@ -27,7 +27,7 @@ end
 
 class TestInterceptor < ::Gruf::Interceptors::ServerInterceptor
   def call
-    ServerImpl.intercepted = true
+    GrufServerImpl.intercepted = true
     yield
   end
 end
@@ -37,7 +37,7 @@ Gruf::Server.new.add_interceptor(TestInterceptor, option_foo: 'value 123')
 RSpec.describe MyServiceController, type: :request do
   describe 'using get' do
     it 'should be successful and call interceptors' do
-      ServerImpl.intercepted = false
+      GrufServerImpl.intercepted = false
       get "/test/blah/xyz?test_id=abc"
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
@@ -45,7 +45,7 @@ RSpec.describe MyServiceController, type: :request do
                                            'fullResponse' => %({"testId":"abc","foobar":"xyz"}),
                                            "ignoredKey" => ''
                                          })
-      expect(ServerImpl.intercepted).to eq(true)
+      expect(GrufServerImpl.intercepted).to eq(true)
     end
   end
 end
