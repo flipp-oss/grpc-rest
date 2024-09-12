@@ -152,6 +152,10 @@ service MyService {
 }
 ```
 
+## Gruf Interceptors
+
+grpc-rest supports [gruf](https://github.com/bigcommerce/gruf) Interceptors. As long as you're not using a custom interceptor
+registry, your interceptors will be called normally around the controller.
 
 ## To Do
 
