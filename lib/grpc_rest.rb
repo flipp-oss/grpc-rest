@@ -203,7 +203,18 @@ module GrpcRest
         active_call: nil,
         message: request
       )
-      handler.send(method.to_sym)
+      Gruf::Interceptors::Context.new(gruf_interceptors(request)).intercept! do
+        handler.send(method.to_sym)
+      end
+    end
+
+    # @param request [Google::Protobuf::AbstractMessage]
+    # @return [Array<Gruf::Interceptors::Base>]
+    def gruf_interceptors(request)
+      error = Gruf::Error.new
+      interceptors = Gruf.interceptors.prepare(request, error)
+      interceptors.delete_if { |k| k.class.name.split('::').first == 'Gruf' }
+      interceptors
     end
 
     def send_grpc_request(service, method, request)

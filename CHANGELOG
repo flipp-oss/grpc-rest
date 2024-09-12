@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+- Feature: Support gruf Interceptors.
+
 # 0.1.20 - 2024-09-10
 - Fix: Repeated float values weren't being treated as arrays and were crashing.
 
