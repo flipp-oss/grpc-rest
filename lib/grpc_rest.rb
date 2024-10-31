@@ -1,7 +1,6 @@
 require 'google/protobuf/well_known_types'
 require 'grpc'
 require 'grpc/core/status_codes'
-require 'base_interceptor'
 
 module GrpcRest
   class << self
