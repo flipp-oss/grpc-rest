@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-require 'rspec'
+require_relative './spec_helper'
 require 'src/proto/grpc/testing/test_services_pb'
 
-require_relative '../lib/base_interceptor'
-require_relative './spec_helper'
-
-RSpec.describe GrpcRest::BaseInterceptor do
+RSpec.describe GrpcRest::BaseInterceptor, type: :class do
   let(:rpc_service) { Grpc::Testing::TestService::Service.new }
   let(:rpc_desc) { Grpc::Testing::TestService::Service.rpc_descs.values.first}
   let(:message) { Grpc::Testing::SimpleRequest.new }

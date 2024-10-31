@@ -17,6 +17,7 @@ loader.inflector.inflect('protoc-gen-openapiv2' => 'ProtocGenOpenapiv2')
 loader.ignore("#{Rails.root}/spec/test_service_pb.rb")
 loader.setup
 require "#{Rails.root}/spec/test_service_pb.rb"
+require "#{Rails.root}/lib/base_interceptor.rb"
 
 $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 
