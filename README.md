@@ -158,6 +158,8 @@ grpc-rest supports [gruf](https://github.com/bigcommerce/gruf) Interceptors thro
 registry, your interceptors will be called normally around the controller.
 
 ```ruby
+require 'grpc_rest/base_interceptor'
+
 module Interceptors
   # Interceptor for catching errors from controllers
   class ErrorInterceptor < GrpcRest::BaseInterceptor
