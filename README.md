@@ -154,8 +154,21 @@ service MyService {
 
 ## Gruf Interceptors
 
-grpc-rest supports [gruf](https://github.com/bigcommerce/gruf) Interceptors. As long as you're not using a custom interceptor
+grpc-rest supports [gruf](https://github.com/bigcommerce/gruf) Interceptors through a custom `GrpcRest::BaseInterceptor` class. As long as you're not using a custom interceptor
 registry, your interceptors will be called normally around the controller.
+
+```ruby
+module Interceptors
+  # Interceptor for catching errors from controllers
+  class ErrorInterceptor < GrpcRest::BaseInterceptor
+    
+    def call
+      # Your code here
+    end
+    
+  end
+end
+```
 
 ## To Do
 
