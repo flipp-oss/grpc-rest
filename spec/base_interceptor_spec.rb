@@ -12,7 +12,7 @@ RSpec.describe GrpcRest::BaseInterceptor, type: :class do
     let(:error_message) { 'some message' }
     let(:error_code) { :invalid_argument }
 
-    it 'fails properly' do
+    it 'intercepts and raises the error' do
       request = Gruf::Controllers::Request.new(
         method_key: :UnaryCall,
         service: rpc_service,
