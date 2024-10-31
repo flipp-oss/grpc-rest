@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.1.22 - 2024-10-31
+- Fix: calling fail! in gruf Interceptors was failing with an unrelated exception.
+
 # 0.1.21 - 2024-09-12
 - Feature: Support gruf Interceptors.
 

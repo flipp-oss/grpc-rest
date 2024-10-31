@@ -3,9 +3,8 @@
 require 'gruf'
 
 module GrpcRest
-    # This is a monkey-patch that fixes an issue we were having with using the fail! method in
-    # interceptors where an active call was not instantiated yet.
-    # Basically, we overloaded this function: https://github.com/bigcommerce/gruf/blob/main/lib/gruf/errors/helpers.rb#L34
+  # Fixes an issue with the fail! method since the active call is not instantiated yet.
+  # Overloads https://github.com/bigcommerce/gruf/blob/main/lib/gruf/errors/helpers.rb#L34
   class BaseInterceptor < ::Gruf::Interceptors::ServerInterceptor
     def fail!(error_code, _app_code, message = 'unknown error', metadata = {})
       raise grpc_error(error_code, message.to_s, metadata)
