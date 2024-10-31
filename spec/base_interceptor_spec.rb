@@ -21,7 +21,7 @@ RSpec.describe GrpcRest::BaseInterceptor, type: :class do
         message: message)
       interceptor = GrpcRest::BaseInterceptor.new(request, Gruf::Error.new)
 
-      expect{ interceptor.fail!(error_code, error_message) }.to raise_error(GRPC::InvalidArgument) do |error|
+      expect{ interceptor.fail!(error_code, error_code, error_message) }.to raise_error(GRPC::InvalidArgument) do |error|
         expect(error.message).to match(error_message)
         expect(error.code).to eq(GRPC::Core::StatusCodes::INVALID_ARGUMENT)
       end

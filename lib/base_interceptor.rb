@@ -7,7 +7,7 @@ module GrpcRest
     # interceptors where an active call was not instantiated yet.
     # Basically, we overloaded this function: https://github.com/bigcommerce/gruf/blob/main/lib/gruf/errors/helpers.rb#L34
   class BaseInterceptor < ::Gruf::Interceptors::ServerInterceptor
-    def fail!(error_code, message = 'unknown error', metadata = {})
+    def fail!(error_code, _app_code, message = 'unknown error', metadata = {})
       raise grpc_error(error_code, message.to_s, metadata)
     end
 
