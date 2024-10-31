@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'gruf/interceptors/server_interceptor'
-require 'gruf/interceptors/base'
+require 'gruf'
 
 module GrpcRest
     # This is a monkey-patch that fixes an issue we were having with using the fail! method in

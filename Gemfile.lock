@@ -3,6 +3,7 @@ PATH
   specs:
     grpc-rest (0.1.21)
       grpc
+      gruf
       rails (>= 6.0)
 
 GEM

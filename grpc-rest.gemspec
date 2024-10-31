@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency('grpc')
   spec.add_runtime_dependency('rails', '>= 6.0')
+  spec.add_runtime_dependency('gruf')
 
   spec.add_development_dependency('rspec-rails')
   spec.add_development_dependency('gruf')
