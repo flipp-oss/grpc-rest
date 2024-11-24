@@ -63,7 +63,7 @@ class {{.ControllerName}}Controller < ActionController::Base
   rescue_from GRPC::BadStatus do |e|
 		render json: GrpcRest.error_msg(e), status: GrpcRest.grpc_http_status(e.code)
   end
-  rescue_from Google::Protobuf::TypeError do |e|
+  rescue_from ActionDispatch::Http::Parameters::ParseError, Google::Protobuf::TypeError do |e|
     render json: GrpcRest.error_msg(e), status: :bad_request
   end
   METHOD_PARAM_MAP = {
@@ -102,20 +102,22 @@ func ProcessService(service *descriptorpb.ServiceDescriptorProto, pkg string) (F
 			return FileResult{}, routes, err
 		}
 		restOpts, err := ExtractRestOptions(m)
-		if err != nil { return FileResult{}, routes, err }
+		if err != nil {
+			return FileResult{}, routes, err
+		}
 		httpMethod, path, err := MethodAndPath(opts.Pattern)
 		pathInfo, err := ParsedPath(path)
 		if err != nil {
 			return FileResult{}, routes, err
 		}
 		controllerMethod := method{
-			Name:           strcase.ToSnake(m.GetName()),
-			RequestType:    Classify(m.GetInputType()),
-			Path:           path,
-			RestOptions:    rubyRestOptions(restOpts),
-			HttpMethod:     httpMethod,
-			Body:           opts.Body,
-			PathInfo:       pathInfo,
+			Name:        strcase.ToSnake(m.GetName()),
+			RequestType: Classify(m.GetInputType()),
+			Path:        path,
+			RestOptions: rubyRestOptions(restOpts),
+			HttpMethod:  httpMethod,
+			Body:        opts.Body,
+			PathInfo:    pathInfo,
 		}
 		data.Methods = append(data.Methods, controllerMethod)
 		routes = append(routes, Route{
