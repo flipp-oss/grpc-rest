@@ -171,6 +171,7 @@ module GrpcRest
     end
 
     def error_msg(error)
+      Rails.logger.error("#{error.message}, backtrace: #{error.backtrace.join("\n")}")
       if error.respond_to?(:code)
       {
           code: error.code,
