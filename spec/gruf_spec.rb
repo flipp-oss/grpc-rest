@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require_relative './spec_helper'
 require_relative './test_service_services_pb'
 require 'gruf'
 
 class GrufServerImpl < Gruf::Controllers::Base
-
   bind ::Testdata::MyService::Service
 
   def test
@@ -38,12 +39,12 @@ RSpec.describe MyServiceController, type: :request do
   describe 'using get' do
     it 'should be successful and call interceptors' do
       GrufServerImpl.intercepted = false
-      get "/test/blah/xyz?test_id=abc"
+      get '/test/blah/xyz?test_id=abc'
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 1,
                                            'fullResponse' => %({"testId":"abc","foobar":"xyz"}),
-                                           "ignoredKey" => ''
+                                           'ignoredKey' => ''
                                          })
       expect(GrufServerImpl.intercepted).to eq(true)
     end
