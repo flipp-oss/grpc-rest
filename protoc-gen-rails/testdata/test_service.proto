@@ -21,6 +21,7 @@ message TestRequest {
   int32 some_int = 11;
   TestEnum some_enum = 12;
   repeated float repeated_float = 13;
+  map<string, SubRecord> map_field = 14;
 }
 
 message SubRecord {
