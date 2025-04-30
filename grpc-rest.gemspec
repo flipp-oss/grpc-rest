@@ -18,9 +18,12 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
+  spec.add_runtime_dependency('google-protobuf', '>= 4.30.2')
   spec.add_runtime_dependency('grpc')
   spec.add_runtime_dependency('rails', '>= 6.0')
 
-  spec.add_development_dependency('rspec-rails')
+  spec.add_development_dependency('byebug')
   spec.add_development_dependency('gruf')
+  spec.add_development_dependency('rspec-rails')
+  spec.add_development_dependency('rspec-snapshot')
 end

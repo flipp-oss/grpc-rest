@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # See https://github.com/rspec/rspec-rails/issues/1596#issuecomment-834282306
 
 require_relative './spec_helper'
@@ -22,24 +24,23 @@ class ServerImpl < Testdata::MyService::Service
 end
 
 RSpec.describe MyServiceController, type: :request do
-
   describe 'using get' do
     it 'should be successful' do
-      get "/test/blah/xyz?test_id=abc"
+      get '/test/blah/xyz?test_id=abc'
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 1,
                                            'fullResponse' => %({"testId":"abc","foobar":"xyz"}),
-                                           "ignoredKey" => ''
+                                           'ignoredKey' => ''
                                          })
     end
   end
 
   describe 'using body parameter' do
-    it "should be successful" do
+    it 'should be successful' do
       params = {
-        sub_id: "id1",
-        another_id: "id2"
+        sub_id: 'id1',
+        another_id: 'id2'
       }
 
       post '/test2?test_id=abc&foobar=xyz&timestamp_field=2024-04-03+01:02:03+UTC', params: params, as: :json
@@ -49,7 +50,6 @@ RSpec.describe MyServiceController, type: :request do
                                            'fullResponse' => %({"testId":"abc","foobar":"xyz","secondRecord":{"subId":"id1","anotherId":"id2"},"timestampField":"2024-04-03T01:02:03Z"})
                                          })
     end
-
   end
 
   describe 'using sub-record splat' do
@@ -68,9 +68,9 @@ RSpec.describe MyServiceController, type: :request do
       {
         test_id: 'abc',
         repeated_float: [1.0, 2.0],
-        some_int: "65",
+        some_int: '65',
         foobar: 'xyz',
-        repeated_string: ['W', 'T', 'F'],
+        repeated_string: %w[W T F],
         map_field: {
           'foo' => {
             sub_id: 'id5',
@@ -86,17 +86,17 @@ RSpec.describe MyServiceController, type: :request do
           another_id: 'id4'
         },
         struct_field: {
-          "str_key": "val",
+          "str_key": 'val',
           "int_key": 123,
           "bool_key": true,
           "nil_key": nil,
           "list_key": [
-                       {
-                         "inner_key": "inner_val"
-                       }
-                     ]
+            {
+              "inner_key": 'inner_val'
+            }
+          ]
         },
-        list_value: ['F', 'Y', 'I'],
+        list_value: %w[F Y I],
         bare_value: 45,
         timestamp_field: '2024-04-03 01:02:03 UTC',
         some_enum: 'TEST_ENUM_FOO'
@@ -106,29 +106,69 @@ RSpec.describe MyServiceController, type: :request do
     it 'should be successful' do
       post '/test4', params: params, as: :json
       expect(response).to be_successful
-      expect(response.parsed_body).to eq({
-                                           'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2],"mapField":{"foo":{"subId":"id5","anotherId":"id6"}}})
-                                         })
+      json = response.parsed_body
+      full_response = JSON.parse(json['fullResponse'])
+      expect(full_response).to eq(
+        { 'testId' => 'abc',
+          'foobar' => 'xyz',
+          "mapField" => {"foo"=>{"anotherId"=>"id6", "subId"=>"id5"}},
+          'repeatedString' => %w[W T F],
+          'subRecord' => { 'subId' => 'id1', 'anotherId' => 'id2' },
+          'secondRecord' => { 'subId' => 'id3', 'anotherId' => 'id4' },
+          'structField' => { 'bool_key' => true,
+                             'str_key' => 'val',
+                             'nil_key' => nil,
+                             'list_key' => [{ 'inner_key' => 'inner_val' }], 'int_key' => 123 },
+          'timestampField' => '2024-04-03T01:02:03Z',
+          'listValue' => %w[F Y I],
+          'bareValue' => 45,
+          'someInt' => 65,
+          'someEnum' => 'TEST_ENUM_FOO',
+          'repeatedFloat' => [1, 2] }
+      )
+      expect(response.parsed_body).to match({
+                                              'someInt' => 4,
+                                              'fullResponse' => a_kind_of(String)
+                                            })
     end
 
     it 'should be successful without the enum prefix' do
       params[:some_enum] = 'FOO'
       post '/test4', params: params, as: :json
       expect(response).to be_successful
-      expect(response.parsed_body).to eq({
-                                           'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2],"mapField":{"foo":{"subId":"id5","anotherId":"id6"}}})
-                                         })
+      json = response.parsed_body
+      full_response = JSON.parse(json['fullResponse'])
+      expect(full_response).to eq(
+        { 'testId' => 'abc',
+          'foobar' => 'xyz',
+          "mapField" => {"foo"=>{"anotherId"=>"id6", "subId"=>"id5"}},
+          'repeatedString' => %w[W T F],
+          'subRecord' => { 'subId' => 'id1', 'anotherId' => 'id2' },
+          'secondRecord' => { 'subId' => 'id3', 'anotherId' => 'id4' },
+          'structField' => { 'bool_key' => true,
+                             'str_key' => 'val',
+                             'nil_key' => nil,
+                             'list_key' => [{ 'inner_key' => 'inner_val' }], 'int_key' => 123 },
+          'timestampField' => '2024-04-03T01:02:03Z',
+          'listValue' => %w[F Y I],
+          'bareValue' => 45,
+          'someInt' => 65,
+          'someEnum' => 'TEST_ENUM_FOO',
+          'repeatedFloat' => [1, 2] }
+      )
+      expect(response.parsed_body).to match({
+                                              'someInt' => 4,
+                                              'fullResponse' => a_kind_of(String)
+                                            })
     end
   end
 
   describe 'numeric timestamp' do
     it 'should be successful' do
       params = {
-        timestamp_field: 1712692452
+        timestamp_field: 1_712_692_452
       }
-      post "/test4", params: params, as: :json
+      post '/test4', params: params, as: :json
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 4,

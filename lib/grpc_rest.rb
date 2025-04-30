@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 require 'google/protobuf/well_known_types'
 require 'grpc'
 require 'grpc/core/status_codes'
 
 module GrpcRest
   class << self
-
     def underscore(s)
       GRPC::GenericService.underscore(s)
     end
@@ -39,7 +40,7 @@ module GrpcRest
 
     # https://stackoverflow.com/a/2158473/5199431
     def longest_common_substring(arr)
-      return "" if arr.empty?
+      return '' if arr.empty?
 
       result = 0
       first_val = arr[0]
@@ -48,6 +49,7 @@ module GrpcRest
         character = first_val[k]
         arr.each { |str| all_matched &= (character == str[k]) }
         break unless all_matched
+
         result += 1
       end
       first_val.slice(0, result)
@@ -64,14 +66,12 @@ module GrpcRest
     end
 
     def map_proto_type(descriptor, val)
-      if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
-        return handle_enum_values(descriptor, val)
-      end
+      return handle_enum_values(descriptor, val) if descriptor.subtype.is_a?(Google::Protobuf::EnumDescriptor)
 
       case descriptor.type
-      when *%i(int32 int64 uint32 uint64 sint32 sint64 fixed32 fixed64 sfixed32 sfixed64)
+      when :int32, :int64, :uint32, :uint64, :sint32, :sint64, :fixed32, :fixed64, :sfixed32, :sfixed64
         return val.to_i
-      when *%i(float double)
+      when :float, :double
         return val.to_f
       when :bool
         return !!val
@@ -79,19 +79,18 @@ module GrpcRest
 
       case descriptor.subtype&.name
       when 'google.protobuf.Struct'
-        return Google::Protobuf::Struct.from_hash(val)
+        Google::Protobuf::Struct.from_hash(val)
       when 'google.protobuf.Timestamp'
-        if val.is_a?(Numeric)
-          return Google::Protobuf::Timestamp.from_time(Time.at(val))
-        else
-          return Google::Protobuf::Timestamp.from_time(Time.new(val))
-        end
+        return Google::Protobuf::Timestamp.from_time(Time.at(val)) if val.is_a?(Numeric)
+
+        Google::Protobuf::Timestamp.from_time(Time.new(val))
+
       when 'google.protobuf.Value'
-        return Google::Protobuf::Value.from_ruby(val)
+        Google::Protobuf::Value.from_ruby(val)
       when 'google.protobuf.ListValue'
-        return Google::Protobuf::ListValue.from_a(val)
+        Google::Protobuf::ListValue.from_a(val)
       else
-        return map_proto_record(descriptor.subtype, val)
+        map_proto_record(descriptor.subtype, val)
       end
     end
 
@@ -110,6 +109,8 @@ module GrpcRest
           params[field] = map_proto_type(descriptor, val)
         end
       end
+
+
       params
     end
 
@@ -135,10 +136,10 @@ module GrpcRest
         end
         assign_value(request, entry[:name], value_to_use)
       end
-      if body_string.present? && body_string != '*'
-        # we need to "splat" the body parameters into the given sub-record rather than into the top-level.
-        sub_record = sub_field(request, body_string, parameters)
-      end
+      return unless body_string.present? && body_string != '*'
+
+      # we need to "splat" the body parameters into the given sub-record rather than into the top-level.
+      sub_field(request, body_string, parameters)
     end
 
     # Ported from https://github.com/grpc-ecosystem/grpc-gateway/blob/main/runtime/errors.go#L36
@@ -176,24 +177,24 @@ module GrpcRest
     def error_msg(error)
       Rails.logger.error("#{error.message}, backtrace: #{error.backtrace.join("\n")}")
       if error.respond_to?(:code)
-      {
+        {
           code: error.code,
           message: error.message,
           details: [
-                    {
-                      backtrace: error.backtrace
-                    }
+            {
+              backtrace: error.backtrace
+            }
           ]
-      }
+        }
       else
         {
-            code: 3,
-            message: "InvalidArgument: #{error.message}",
-            details: [
-                      {
-                        backtrace: error.backtrace
-                      }
-            ]
+          code: 3,
+          message: "InvalidArgument: #{error.message}",
+          details: [
+            {
+              backtrace: error.backtrace
+            }
+          ]
         }
       end
     end
@@ -232,14 +233,12 @@ module GrpcRest
         klass = ::Gruf::Controllers::Base.subclasses.find do |k|
           k.bound_service == service_obj
         end
-        if klass
-          return send_gruf_request(klass, service_obj, method, request)
-        end
+        return send_gruf_request(klass, service_obj, method, request) if klass
       end
       send_grpc_request(service, method, request)
     end
 
-    def send_request(service, method, request, options={})
+    def send_request(service, method, request, options = {})
       response = get_response(service, method, request)
       if options[:emit_defaults]
         response.to_json(emit_defaults: true)
@@ -248,5 +247,4 @@ module GrpcRest
       end
     end
   end
-
 end

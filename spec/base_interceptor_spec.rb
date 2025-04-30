@@ -5,7 +5,7 @@ require 'src/proto/grpc/testing/test_services_pb'
 
 RSpec.describe GrpcRest::BaseInterceptor, type: :class do
   let(:rpc_service) { Grpc::Testing::TestService::Service.new }
-  let(:rpc_desc) { Grpc::Testing::TestService::Service.rpc_descs.values.first}
+  let(:rpc_desc) { Grpc::Testing::TestService::Service.rpc_descs.values.first }
   let(:message) { Grpc::Testing::SimpleRequest.new }
 
   describe '#fail!' do
@@ -18,10 +18,13 @@ RSpec.describe GrpcRest::BaseInterceptor, type: :class do
         service: rpc_service,
         rpc_desc: rpc_desc,
         active_call: nil,
-        message: message)
+        message: message
+      )
       interceptor = GrpcRest::BaseInterceptor.new(request, Gruf::Error.new)
 
-      expect{ interceptor.fail!(error_code, error_code, error_message) }.to raise_error(GRPC::InvalidArgument) do |error|
+      expect do
+        interceptor.fail!(error_code, error_code, error_message)
+      end.to raise_error(GRPC::InvalidArgument) do |error|
         expect(error.message).to match(error_message)
         expect(error.code).to eq(GRPC::Core::StatusCodes::INVALID_ARGUMENT)
       end

@@ -23,15 +23,15 @@ The protobuf generator uses the same annotations as [grpc-gateway](https://githu
 
 ## Installation
 
-First, download `protoc-gen-rails` from the releases page on the right and unzip it. Ensure the binary is somewhere in your PATH.
-
-Then, add the following to your `Gemfile`:
+Add the following to your `Gemfile`:
 
 ```ruby
 gem 'grpc-rest'
 ```
 
-and run `bundle install`.
+and run `bundle install`. Then when using `protoc` or `buf generate`, ensure you prefix the command with `bundle exec`, e.g.
+
+`bundle exec buf generate`
 
 ## Example
 
@@ -78,6 +78,9 @@ plugins:
       - paths=source_relative
   - name: rails
     out: .
+    opt:
+      # this should be the same directory as the output of your Ruby plugin
+      - require=app/gen 
 ```
 
 Then, you can run `buf generate` to generate the Ruby files. This will generate:
@@ -171,10 +174,6 @@ module Interceptors
   end
 end
 ```
-
-## To Do
-
-* Replace Go implementation with Ruby (+ executable)
 
 ## Contributing
 
