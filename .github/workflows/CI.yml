@@ -8,23 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-go:
-    runs-on: [ubuntu-latest]
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Setup Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.21'
-    - name: Install Protoc
-      uses: arduino/setup-protoc@v2
-    - run: git reset --hard
-    - run: git clean -f -d
-    - run: cd protoc-gen-rails && go test ./...
-
   test-ruby:
     runs-on: [ubuntu-latest]
     steps:
@@ -37,10 +20,12 @@ jobs:
       with:
         ruby-version: '3.3'
         bundler-cache: true
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v2
     - run: bundle exec rspec
 
   build_and_deploy:
-    needs: [test-go, test-ruby]
+    needs: [test-ruby]
     runs-on: [ubuntu-latest]
     steps:
     - name: Checkout code
