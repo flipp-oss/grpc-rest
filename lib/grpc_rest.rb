@@ -102,7 +102,10 @@ module GrpcRest
         next if val.nil?
 
         if descriptor.label == :repeated
-          params[field] = val.map { |v| map_proto_type(descriptor, v) }
+          # leave map entries as key => value
+          unless descriptor.subtype&.options&.to_h&.dig(:map_entry)
+            params[field] = val.map { |v| map_proto_type(descriptor, v) }
+          end
         else
           params[field] = map_proto_type(descriptor, val)
         end

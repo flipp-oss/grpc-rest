@@ -71,6 +71,12 @@ RSpec.describe MyServiceController, type: :request do
         some_int: "65",
         foobar: 'xyz',
         repeated_string: ['W', 'T', 'F'],
+        map_field: {
+          'foo' => {
+            sub_id: 'id5',
+            another_id: 'id6'
+          }
+        },
         sub_record: {
           sub_id: 'id1',
           another_id: 'id2'
@@ -102,7 +108,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2]})
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2],"mapField":{"foo":{"subId":"id5","anotherId":"id6"}}})
                                          })
     end
 
@@ -112,7 +118,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 4,
-                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2]})
+                                           'fullResponse' => %({"testId":"abc","foobar":"xyz","repeatedString":["W","T","F"],"subRecord":{"subId":"id1","anotherId":"id2"},"secondRecord":{"subId":"id3","anotherId":"id4"},"structField":{"bool_key":true,"str_key":"val","nil_key":null,"list_key":[{"inner_key":"inner_val"}],"int_key":123},"timestampField":"2024-04-03T01:02:03Z","listValue":["F","Y","I"],"bareValue":45,"someInt":65,"someEnum":"TEST_ENUM_FOO","repeatedFloat":[1,2],"mapField":{"foo":{"subId":"id5","anotherId":"id6"}}})
                                          })
     end
   end
