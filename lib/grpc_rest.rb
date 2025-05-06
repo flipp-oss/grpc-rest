@@ -101,12 +101,13 @@ module GrpcRest
         next if val.nil?
 
         if descriptor.label == :repeated
+          arr = val.is_a?(Google::Protobuf::RepeatedField) ? val : val.to_s.split(',')
           # leave map entries as key => value
           unless descriptor.subtype&.options&.to_h&.dig(:map_entry)
-            params[field] = val.map { |v| map_proto_type(descriptor, v) }
+            params[field] = arr.map { |v| map_proto_type(descriptor, v) }
           end
         else
-          params[field] = map_proto_type(descriptor, val)
+          params[field] = map_proto_type(descriptor, arr)
         end
       end
 
