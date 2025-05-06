@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.2.1 - 2025-05-06
+- Fix: Use `Array.wrap` to prevent grpc-rest from crashing when query parameters don't have `[]` suffixed.
+
+# 0.2.0 - 2025-04-30
+
 - Rewrite protobuf plugin in Ruby.
 
 # 0.1.25 - 2025-04-30
