@@ -175,6 +175,14 @@ module Interceptors
 end
 ```
 
+### Configuration
+
+GrpcRest currently has one configuration option, `strict_mode`, which defaults to false. When set to true, any JSON request that includes an unknown field will be rejected.
+
+```ruby
+GrpcRest.strict_mode = true
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/flipp-oss/grpc-rest.

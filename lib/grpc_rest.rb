@@ -6,6 +6,9 @@ require 'grpc/core/status_codes'
 
 module GrpcRest
   class << self
+
+    attr_accessor :strict_mode
+
     def underscore(s)
       GRPC::GenericService.underscore(s)
     end
@@ -116,7 +119,11 @@ module GrpcRest
 
     def init_request(request_class, params)
       map_proto_record(request_class.descriptor, params)
-      request_class.decode_json(JSON.generate(params), ignore_unknown_fields: true)
+      if GrpcRest.strict_mode
+        request_class.decode_json(JSON.generate(params))
+      else
+        request_class.decode_json(JSON.generate(params), ignore_unknown_fields: true)
+      end
     end
 
     def assign_params(request, param_hash, body_string, params)

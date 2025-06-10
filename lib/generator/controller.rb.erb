@@ -17,9 +17,9 @@ class <%= service.name.demodulize %>Controller < ActionController::Base
 
 <% service.methods.each do |method| %>
 	def <%= method.name %>
-    fields = <%= method.request_type %>.descriptor.to_a.map(&:name)
-    parameters = request.parameters.to_h.deep_transform_keys(&:underscore)
-    grpc_request = GrpcRest.init_request(<%= method.request_type %>, parameters.slice(*fields))
+    parameters = request.parameters.to_h.deep_transform_keys(&:underscore).
+      except(*%w(controller action <%= service.name.underscore %>))
+    grpc_request = GrpcRest.init_request(<%= method.request_type %>, parameters)
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["<%= method.name.underscore %>"], "<%= method.option_body %>", request.parameters)
     render json: GrpcRest.send_request("<%= service.namespace %>::<%= service.name.classify %>", "<%= method.name.underscore %>", grpc_request, <%= method.rest_options.inspect %>)
   end
