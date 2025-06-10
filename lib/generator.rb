@@ -14,7 +14,6 @@ module ProtocGenRails
   FileResult = Struct.new(:name, :content)
 
   class << self
-
     # @param params [String]
     def require_directories(params)
       params.split(',').each do |param|

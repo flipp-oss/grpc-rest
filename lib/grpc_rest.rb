@@ -6,7 +6,6 @@ require 'grpc/core/status_codes'
 
 module GrpcRest
   class << self
-
     attr_accessor :strict_mode
 
     def underscore(s)
@@ -112,7 +111,6 @@ module GrpcRest
           params[field] = map_proto_type(descriptor, val)
         end
       end
-
 
       params
     end

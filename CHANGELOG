@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## UNRELEASED
 
 - Feature: Add `strict_mode` configuration for rejecting invalid JSON fields.
+- Fixes for test failures that were caused by changes in 0.2.0 - test files weren't correctly regenerated.
 
 # 0.2.1 - 2025-05-06
 - Fix: Use `Array.wrap` to prevent grpc-rest from crashing when query parameters don't have `[]` suffixed.

@@ -10,15 +10,15 @@ class ServerImpl < Testdata::MyService::Service
     Testdata::TestResponse.new(some_int: 1, full_response: req.to_json)
   end
 
-  def test_2(req)
+  def test2(req)
     Testdata::TestResponse.new(some_int: 2, full_response: req.to_json)
   end
 
-  def test_3(req)
+  def test3(req)
     Testdata::TestResponse.new(some_int: 3, full_response: req.to_json)
   end
 
-  def test_4(req)
+  def test4(req)
     Testdata::TestResponse.new(some_int: 4, full_response: req.to_json)
   end
 end
@@ -44,6 +44,7 @@ RSpec.describe MyServiceController, type: :request do
       }
 
       post '/test2?test_id=abc&foobar=xyz&timestamp_field=2024-04-03+01:02:03+UTC', params: params, as: :json
+      puts response.body
       expect(response).to be_successful
       expect(response.parsed_body).to eq({
                                            'someInt' => 2,
@@ -103,6 +104,20 @@ RSpec.describe MyServiceController, type: :request do
       }
     end
 
+    it 'should pass with incorrect field' do
+      params[:blarg] = 'himom'
+      post '/test4', params: params, as: :json
+      expect(response).to be_successful
+    end
+
+    it 'should fail in strict mode' do
+      GrpcRest.strict_mode = true
+      params[:blarg] = 'himom'
+      post '/test4', params: params, as: :json
+      expect(response).not_to be_successful
+      GrpcRest.strict_mode = false
+    end
+
     it 'should be successful' do
       post '/test4', params: params, as: :json
       expect(response).to be_successful
@@ -111,7 +126,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(full_response).to eq(
         { 'testId' => 'abc',
           'foobar' => 'xyz',
-          "mapField" => {"foo"=>{"anotherId"=>"id6", "subId"=>"id5"}},
+          'mapField' => { 'foo' => { 'anotherId' => 'id6', 'subId' => 'id5' } },
           'repeatedString' => %w[W T F],
           'subRecord' => { 'subId' => 'id1', 'anotherId' => 'id2' },
           'secondRecord' => { 'subId' => 'id3', 'anotherId' => 'id4' },
@@ -141,7 +156,7 @@ RSpec.describe MyServiceController, type: :request do
       expect(full_response).to eq(
         { 'testId' => 'abc',
           'foobar' => 'xyz',
-          "mapField" => {"foo"=>{"anotherId"=>"id6", "subId"=>"id5"}},
+          'mapField' => { 'foo' => { 'anotherId' => 'id6', 'subId' => 'id5' } },
           'repeatedString' => %w[W T F],
           'subRecord' => { 'subId' => 'id1', 'anotherId' => 'id2' },
           'secondRecord' => { 'subId' => 'id3', 'anotherId' => 'id4' },

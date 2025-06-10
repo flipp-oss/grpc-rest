@@ -190,7 +190,13 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/flipp-
 To regenerate Ruby protobuf code for tests, install the `grpc-tools` gem and run this from the base directory:
 
 ```
-grpc_tools_ruby_protoc -I=./protoc-gen-rails/testdata --proto_path=./protoc-gen-rails/google-deps --ruby_out=./spec --grpc_out=./spec ./protoc-gen-rails/testdata/test_service.proto
+grpc_tools_ruby_protoc -I=./spec/testdata --proto_path=./spec/google-deps --ruby_out=./spec --grpc_out=./spec ./spec/testdata/test_service.proto
+```
+
+To regenerate the controller and route files for tests, run:
+
+```
+bundle exec grpc_tools_ruby_protoc -I=./spec/testdata --proto_path=./spec/google-deps --rails_out=spec/testdata/base --rails_opt=require=spec/gen  ./spec/testdata/test_service.proto
 ```
 
 ## License
