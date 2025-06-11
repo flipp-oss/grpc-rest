@@ -11,15 +11,15 @@ class GrufServerImpl < Gruf::Controllers::Base
     Testdata::TestResponse.new(some_int: 1, full_response: request.message.to_json)
   end
 
-  def test_2
+  def test2
     Testdata::TestResponse.new(some_int: 2, full_response: request.message.to_json)
   end
 
-  def test_3
+  def test3
     Testdata::TestResponse.new(some_int: 3, full_response: request.message.to_json)
   end
 
-  def test_4
+  def test4
     Testdata::TestResponse.new(some_int: 4, full_response: request.message.to_json)
   end
 

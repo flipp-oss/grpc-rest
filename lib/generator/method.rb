@@ -82,7 +82,7 @@ module ProtocGenRails
         val = ''
         equal = name.index('=')
         if equal
-          val = name[equal..]
+          val = name[equal+1..]
           name = name[0..equal - 1]
         end
         PathInfo.new(
