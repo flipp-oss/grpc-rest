@@ -180,7 +180,11 @@ module GrpcRest
     end
 
     def error_msg(error)
-      Rails.logger.error("#{error.message}, backtrace: #{error.backtrace.join("\n")}")
+      error_info = "#{error.message}, backtrace: #{error.backtrace.join("\n")}"
+      if error.respond_to?(:cause) && error.cause
+        error_info += "\n\nCaused by: " + error.cause.backtrace.join("\n")
+      end
+      Rails.logger.error(error_info)
       if error.respond_to?(:code)
         {
           code: error.code,

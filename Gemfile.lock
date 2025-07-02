@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grpc-rest (0.2.1)
+    grpc-rest (0.3.1)
       google-protobuf (>= 4.30.2)
       grpc
       rails (>= 6.0)
@@ -88,9 +88,15 @@ GEM
     google-protobuf (4.30.2-arm64-darwin)
       bigdecimal
       rake (>= 13)
+    google-protobuf (4.30.2-x86_64-linux)
+      bigdecimal
+      rake (>= 13)
     googleapis-common-protos-types (1.19.0)
       google-protobuf (>= 3.18, < 5.a)
     grpc (1.71.0-arm64-darwin)
+      google-protobuf (>= 3.25, < 5.0)
+      googleapis-common-protos-types (~> 1.0)
+    grpc (1.71.0-x86_64-linux)
       google-protobuf (>= 3.25, < 5.0)
       googleapis-common-protos-types (~> 1.0)
     grpc-tools (1.64.0)
