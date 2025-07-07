@@ -211,7 +211,7 @@ module GrpcRest
       end
     end
 
-    def send_gruf_request(klass, service_obj, method, request, headers: headers)
+    def send_gruf_request(klass, service_obj, method, request, headers: {})
       ref = service_obj.rpc_descs[method.classify.to_sym]
       call = GrpcRestCall.new(headers)
       handler = klass.new(
