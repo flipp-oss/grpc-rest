@@ -29,7 +29,7 @@ class MyServiceController < ActionController::Base
       except(*%w(controller action my_service))
     grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters)
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test"], "", request.parameters)
-    render json: GrpcRest.send_request("Testdata::MyService", "test", grpc_request, {:emit_defaults=>true})
+    render json: GrpcRest.send_request("Testdata::MyService", "test", grpc_request, {:emit_defaults=>true}, headers: request.headers)
   end
 
 	def test2
@@ -37,7 +37,7 @@ class MyServiceController < ActionController::Base
       except(*%w(controller action my_service))
     grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters)
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test2"], "second_record", request.parameters)
-    render json: GrpcRest.send_request("Testdata::MyService", "test2", grpc_request, {})
+    render json: GrpcRest.send_request("Testdata::MyService", "test2", grpc_request, {}, headers: request.headers)
   end
 
 	def test3
@@ -45,7 +45,7 @@ class MyServiceController < ActionController::Base
       except(*%w(controller action my_service))
     grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters)
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test3"], "", request.parameters)
-    render json: GrpcRest.send_request("Testdata::MyService", "test3", grpc_request, {})
+    render json: GrpcRest.send_request("Testdata::MyService", "test3", grpc_request, {}, headers: request.headers)
   end
 
 	def test4
@@ -53,7 +53,7 @@ class MyServiceController < ActionController::Base
       except(*%w(controller action my_service))
     grpc_request = GrpcRest.init_request(Testdata::TestRequest, parameters)
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["test4"], "*", request.parameters)
-    render json: GrpcRest.send_request("Testdata::MyService", "test4", grpc_request, {})
+    render json: GrpcRest.send_request("Testdata::MyService", "test4", grpc_request, {}, headers: request.headers)
   end
 
 end

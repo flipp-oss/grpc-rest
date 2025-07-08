@@ -5,6 +5,9 @@ require 'grpc'
 require 'grpc/core/status_codes'
 
 module GrpcRest
+
+  GrpcRestCall = Struct.new(:metadata)
+
   class << self
     attr_accessor :strict_mode
 
@@ -208,21 +211,29 @@ module GrpcRest
       end
     end
 
-    def send_gruf_request(klass, service_obj, method, request)
+    def send_gruf_request(klass, service_obj, method, request, headers: {})
       ref = service_obj.rpc_descs[method.classify.to_sym]
+      call = GrpcRestCall.new(headers)
       handler = klass.new(
         method_key: method.to_sym,
         service: service_obj,
         rpc_desc: ref,
-        active_call: nil,
+        active_call: GrpcRestCall.new(headers),
         message: request
       )
-      Gruf::Interceptors::Context.new(gruf_interceptors(request)).intercept! do
+      controller_request = Gruf::Controllers::Request.new(
+        method_key: method.to_sym,
+        service: service_obj,
+        rpc_desc: ref,
+        active_call: call,
+        message: request
+      )
+      Gruf::Interceptors::Context.new(gruf_interceptors(controller_request)).intercept! do
         handler.send(method.to_sym)
       end
     end
 
-    # @param request [Google::Protobuf::AbstractMessage]
+    # @param request [Gruf::Controllers::Request]
     # @return [Array<Gruf::Interceptors::Base>]
     def gruf_interceptors(request)
       error = Gruf::Error.new
@@ -236,19 +247,19 @@ module GrpcRest
       klass.new.public_send(method, request)
     end
 
-    def get_response(service, method, request)
+    def get_response(service, method, request, headers: {})
       if defined?(Gruf)
         service_obj = service.constantize::Service
         klass = ::Gruf::Controllers::Base.subclasses.find do |k|
           k.bound_service == service_obj
         end
-        return send_gruf_request(klass, service_obj, method, request) if klass
+        return send_gruf_request(klass, service_obj, method, request, headers: headers) if klass
       end
       send_grpc_request(service, method, request)
     end
 
-    def send_request(service, method, request, options = {})
-      response = get_response(service, method, request)
+    def send_request(service, method, request, options = {}, headers: {})
+      response = get_response(service, method, request, headers: headers)
       if options[:emit_defaults]
         response.to_json(emit_defaults: true)
       else

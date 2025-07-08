@@ -21,7 +21,7 @@ class <%= service.name.demodulize %>Controller < ActionController::Base
       except(*%w(controller action <%= service.name.underscore %>))
     grpc_request = GrpcRest.init_request(<%= method.request_type %>, parameters)
     GrpcRest.assign_params(grpc_request, METHOD_PARAM_MAP["<%= method.name.underscore %>"], "<%= method.option_body %>", request.parameters)
-    render json: GrpcRest.send_request("<%= service.namespace %>::<%= service.name.classify %>", "<%= method.name.underscore %>", grpc_request, <%= method.rest_options.inspect %>)
+    render json: GrpcRest.send_request("<%= service.namespace %>::<%= service.name.classify %>", "<%= method.name.underscore %>", grpc_request, <%= method.rest_options.inspect %>, headers: request.headers)
   end
 <% end %>
 end
