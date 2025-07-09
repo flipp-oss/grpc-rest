@@ -3,6 +3,7 @@
 require 'google/protobuf/well_known_types'
 require 'grpc'
 require 'grpc/core/status_codes'
+require 'grpc_rest/railtie'
 
 module GrpcRest
 
@@ -10,6 +11,7 @@ module GrpcRest
 
   class << self
     attr_accessor :strict_mode
+    attr_accessor :services
 
     def underscore(s)
       GRPC::GenericService.underscore(s)
@@ -243,17 +245,16 @@ module GrpcRest
     end
 
     def send_grpc_request(service, method, request)
-      klass = service.constantize::Service.subclasses.first
+      klass = service.subclasses.first
       klass.new.public_send(method, request)
     end
 
     def get_response(service, method, request, headers: {})
       if defined?(Gruf)
-        service_obj = service.constantize::Service
         klass = ::Gruf::Controllers::Base.subclasses.find do |k|
-          k.bound_service == service_obj
+          k.bound_service == service
         end
-        return send_gruf_request(klass, service_obj, method, request, headers: headers) if klass
+        return send_gruf_request(klass, service, method, request, headers: headers) if klass
       end
       send_grpc_request(service, method, request)
     end
