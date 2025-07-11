@@ -23,7 +23,7 @@ class ServerImpl < Testdata::MyService::Service
   end
 end
 
-RSpec.describe MyServiceController, type: :request do
+RSpec.describe 'generated controller', type: :request do
   describe 'using get' do
     it 'should be successful' do
       get '/test/blah/xyz?test_id=abc'

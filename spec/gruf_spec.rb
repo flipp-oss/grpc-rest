@@ -35,7 +35,7 @@ end
 
 Gruf::Server.new.add_interceptor(TestInterceptor, option_foo: 'value 123')
 
-RSpec.describe MyServiceController, type: :request do
+RSpec.describe 'generated controller', type: :request do
   describe 'using get' do
     it 'should be successful and call interceptors' do
       GrufServerImpl.intercepted = false
