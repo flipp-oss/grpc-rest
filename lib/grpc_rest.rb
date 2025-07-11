@@ -196,7 +196,7 @@ module GrpcRest
           message: error.message,
           details: [
             {
-              backtrace: error.backtrace
+              backtrace: error_info
             }
           ]
         }
