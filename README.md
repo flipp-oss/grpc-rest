@@ -1,5 +1,5 @@
 # grpc-rest
-Generate Rails routes and controllers from protobuf files.
+Generate dynamic Rails routes and controllers from protobuf files.
 
 grpc-rest allows you to have a single codebase that serves both gRPC and classic Rails routes, with
 a single handler (the gRPC handler) for both types of requests. It will add Rails routes to your
@@ -12,14 +12,13 @@ the default port for Rails is 3000 and for gRPC is 9001).
 
 With this, you get the automatic client code generation via Swagger and gRPC, the input validation that's automatic with gRPC, and the ease of use of tools like `curl` and Postman with REST.
 
-## Components
+## Upgrading to 0.5
 
-`grpc-rest` comes with two main components:
-
-* A protobuf generator plugin that generates Ruby files for Rails routes and controllers.
-* The Rails library that powers these generated files.
-
-The protobuf generator uses the same annotations as [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway). This also gives you the benefit of being able to generate Swagger files by using protoc.
+Before 0.5, you needed to generate Rails controller and route files. As of 0.5, these are no longer necessary and you can remove the following:
+* Generated files in `app/controllers`
+* Generated files in `config/routes`
+* The `draw(:grpc)` line in `config/routes.rb`
+* Add `require 'grpc_rest'` to your `config/application.rb`
 
 ## Installation
 
@@ -29,9 +28,17 @@ Add the following to your `Gemfile`:
 gem 'grpc-rest'
 ```
 
-and run `bundle install`. Then when using `protoc` or `buf generate`, ensure you prefix the command with `bundle exec`, e.g.
+and run `bundle install`. 
 
-`bundle exec buf generate`
+Then add this to your `config/application.rb`:
+
+```ruby 
+require 'grpc_rest'
+```
+
+## Routes
+
+`grpc-rest` uses the same annotations as [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) to define routes. This also gives you the benefit of being able to generate Swagger files by using protoc.
 
 ## Example
 
@@ -61,7 +68,7 @@ service ExampleService {
 }
 ```
 
-First, you need to generate the Ruby files from this. You can do this with plain `protoc`, but it's much easier to handle if you use [buf](https://buf.build/). Here's an example `buf.gen.yaml` file:
+You need to generate the Ruby files from this, the same way you would for any Protobuf Ruby code. You can do this with plain `protoc`, but it's much easier to handle if you use [buf](https://buf.build/). Here's an example `buf.gen.yaml` file:
 
 ```yaml
 version: v1
@@ -76,59 +83,16 @@ plugins:
     out: app/gen
     opt:
       - paths=source_relative
-  - name: rails
-    out: .
-    opt:
-      # this should be the same directory as the output of your Ruby plugin
-      - require=app/gen 
 ```
 
-Then, you can run `buf generate` to generate the Ruby files. This will generate:
-* the Protobuf Ruby files for grpc, in `app/gen`
-* A new route file, in `config/routes/grpc.rb`
-* A new controller file, in `app/controllers`.
+Then, you can run `buf generate` to generate the Ruby files.
 
-The generated route file will look like this:
+The dynamic route will act like this:
 
 ```ruby
 get "example/:name", to: "example#get_example"
 ```
 
-and the generated controller will look like this:
-
-```ruby
-require 'services/example/example_services_pb'
-class ExampleServiceController < ActionController::Base
-  protect_from_forgery with: :null_session
-  
-  METHOD_PARAM_MAP = {
-
-    "example" => [
-       {name: "name", val: nil, split_name:["name"]},
-			 ],
-  }.freeze
-
-	rescue_from StandardError do |e|
-		render json: GrpcRest.error_msg(e)
-	end
-
-	def example
-	  grpc_request = Services::Example::ExampleRequest.new
-	  GrpcRest.assign_params(grpc_request, "/example/{name}", "", request.parameters)
-      render json: GrpcRest.send_request("Services::Example::ExampleService", "example", grpc_request)
-  end
-
-end
-```
-
-To power it on, all you have to do is add the following to your `config/routes.rb`:
-
-```ruby
-Rails.application.routes.draw do
-  draw(:grpc) # Add this line
-end
-```
- 
 ## Caveats
 
 This gem does not currently support the full path expression capabilities of grpc-gateway or the Google [http proto](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto). It only supports very basic single wildcard globbing (`*`). Contributions are welcome for more complex cases if they are needed.
@@ -177,6 +141,14 @@ end
 
 ### Configuration
 
+If you're using `gruf`, grpc-rest will automatically collect the known Gruf controllers. If you're not using it, you have to tell grpc-rest which services you want to generate for by setting:
+
+```ruby
+GrpcRest.services = [
+  Example::ExampleService::Service
+]
+```
+
 GrpcRest currently has one configuration option, `strict_mode`, which defaults to false. When set to true, any JSON request that includes an unknown field will be rejected.
 
 ```ruby
@@ -191,12 +163,6 @@ To regenerate Ruby protobuf code for tests, install the `grpc-tools` gem and run
 
 ```
 grpc_tools_ruby_protoc -I=./spec/testdata --proto_path=./spec/google-deps --ruby_out=./spec --grpc_out=./spec ./spec/testdata/test_service.proto
-```
-
-To regenerate the controller and route files for tests, run:
-
-```
-bundle exec grpc_tools_ruby_protoc -I=./spec/testdata --proto_path=./spec/google-deps --rails_out=spec/testdata/base --rails_opt=require=spec/gen  ./spec/testdata/test_service.proto
 ```
 
 ## License

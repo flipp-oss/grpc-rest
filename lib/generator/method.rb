@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module ProtocGenRails
-  class Method
+module GrpcRest
+  class GeneratedMethod
     PathInfo = Struct.new(:name, :val, :split_name)
 
     attr_accessor :http_method, :path, :path_info, :rest_options
@@ -22,7 +22,7 @@ module ProtocGenRails
 
     # @return [String]
     def request_type
-      @method.input_type.name.split('.').map(&:camelcase).join('::')
+      @method.input_type.msgclass
     end
 
     # @return [String]
