@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grpc-rest (0.5.0)
+    grpc-rest (0.5.1)
       google-protobuf (>= 4.30.2)
       grpc
       rails (>= 6.0)

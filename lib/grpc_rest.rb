@@ -90,7 +90,12 @@ module GrpcRest
       when 'google.protobuf.Timestamp'
         return Google::Protobuf::Timestamp.from_time(Time.at(val)) if val.is_a?(Numeric)
 
-        Google::Protobuf::Timestamp.from_time(Time.new(val))
+        begin
+          parsed_time = Time.new(val)
+          Google::Protobuf::Timestamp.from_time(parsed_time)
+        rescue ArgumentError => e
+          raise ArgumentError, "Could not parse time value '#{val}': #{e.message}"
+        end
 
       when 'google.protobuf.Value'
         Google::Protobuf::Value.from_ruby(val)

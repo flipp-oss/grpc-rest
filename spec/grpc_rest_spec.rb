@@ -51,6 +51,22 @@ RSpec.describe 'generated controller', type: :request do
                                            'fullResponse' => %({"testId":"abc","foobar":"xyz","secondRecord":{"subId":"id1","anotherId":"id2"},"timestampField":"2024-04-03T01:02:03Z"})
                                          })
     end
+
+    it 'should return a good error for invalid times' do
+      params = {
+        sub_id: 'id1',
+        another_id: 'id2'
+      }
+
+      post '/test2?test_id=abc&foobar=xyz&timestamp_field=2024-04-03+01:02', params: params, as: :json
+      puts response.body
+      expect(response).not_to be_successful
+      expect(response.parsed_body).
+        to match(hash_including({
+                                  'code' => 3,
+                                  'message' => "InvalidArgument: Could not parse time value '2024-04-03 01:02': missing sec part: 01:02"
+                                }))
+    end
   end
 
   describe 'using sub-record splat' do

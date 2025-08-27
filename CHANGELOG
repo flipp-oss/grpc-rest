@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+# 0.5.1 - 2025-08-27
+
+- Fix: Better error message for invalid time values.
+
 # 0.5.0 - 2025-08-25
 
 - ***MAJOR CHANGE***: `grpc-rest` now no longer requires any code generation. All functionality is dynamic and loads on startup.
